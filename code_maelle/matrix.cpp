@@ -6,7 +6,7 @@
 #include "matrix.hpp"
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
-//fonction qui remplit la matrice de diffsuion du problème
+//fonction qui remplit la matrice de diffusion du problème
 
 void sparseMatrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &value, int Nx, int Ny, double Lx, double Ly, double D, double dt){
   // Fonction qui remplt la matrice associée au problème avec un stockage coordonnées
@@ -43,7 +43,7 @@ void sparseMatrix(std::vector<int> &row,std::vector<int> &col,std::vector<double
 //fonction qui remplit la matrice de diffusion partielle
 
 void sparseMatrix_parallel(std::vector<int> &row,std::vector<int> &col,std::vector<double> &value, int Nx, int Ny, double Lx, double Ly, double D, double dt,int iBeg,int iEnd){
-  // Fonction qui remplt la matrice associée au problème avec un stockage coordonnées
+  // Fonction qui remplit la matrice associée au problème avec un stockage coordonnées
   double di(0),sdi(0),ssdi(0),dx=Lx/(Nx+1),dy=Ly/(Ny+1);
   di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
   sdi=-dt*D/pow(dx,2);
@@ -83,7 +83,7 @@ void sparseMatrix_parallel(std::vector<int> &row,std::vector<int> &col,std::vect
 }
 
 // ---------------------------------------------------------
-//fonction qui remplit le vecteur second mambre du problème
+//fonction qui remplit le vecteur second membre du problème
 
 void secondMembre(std::vector<double> &S,std::vector<double> U, int Nx, int Ny,double dt, double t, double Lx, double Ly, double D, int mode){
   // Fonction qui remplit le second membre
