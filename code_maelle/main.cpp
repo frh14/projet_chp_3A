@@ -7,7 +7,7 @@
 #include <string>
 #include <sstream>
 #include<sys/time.h>
-#include <mpi.h>
+//#include <mpi.h>
 
 #include "fonctions.hpp"
 #include "matrix.hpp"

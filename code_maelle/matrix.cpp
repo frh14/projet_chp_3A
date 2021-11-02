@@ -14,7 +14,7 @@ void sparseMatrix(std::vector<int> &row,std::vector<int> &col,std::vector<double
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
   di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
   sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
+  //ssdi=-dt*D/pow(dy,2);
   for(int i=0; i<(Nx*Ny); i++){
     col.push_back(i);
     row.push_back(i);
@@ -28,14 +28,14 @@ void sparseMatrix(std::vector<int> &row,std::vector<int> &col,std::vector<double
       row.push_back(i);
       value.push_back(sdi);
     }
-    if(i+Nx<Nx*Nx){
+    /*if(i+Nx<Nx*Nx){
     col.push_back(i); //stockage de la sous-sous-diagonale
     row.push_back(i+Nx);
     value.push_back(ssdi);
     col.push_back(i+Nx); //stockage de la sur-sur-diagonale (symetrie)
     row.push_back(i);
     value.push_back(ssdi);
-    }
+  }*/
   }
 }
 
