@@ -22,8 +22,8 @@ int main(int argc, char** argv) {
   ifstream file("parameters.txt");
   int    Nx(0), Ny(0);        // Nombre de noeuds en x et en y
   double Lx(0), Ly(0), D(0), dt(0); //taille du rectangle, coefficient de diffusion et pas de temps
-  int    mode(0);             // Variable qui permet de choisir quelles fonctions f,g,h sont prises
-  file >> Nx >> Ny >> Lx >> Ly >> D >> dt >> mode;
+  int    mode(0) , nb_shared_col(0);             // Variable qui permet de choisir quelles fonctions f,g,h sont prises , nb de colonne partagee
+  file >> Nx >> Ny >> Lx >> Ly >> D >> dt >> mode >> nb_shared_col;
   file.close();
 
 
