@@ -5,12 +5,10 @@
 #include "fonctions.hpp"
 #include "matrix.hpp"
 
-
 //------------------------------------------------------------------------------------------------------------------------
 //fonction qui remplit la matrice de diffusion sur un sous domaine
 
-void mul_Matrix(std::vector<double> &U, std::vector<double> &W, int Nx, int Ny, int N, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
-  // Fonction qui remplit la matrice associée au problème avec un stockage coordonnées/valeur dans trois tableaux
+void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
 
@@ -19,38 +17,69 @@ void mul_Matrix(std::vector<double> &U, std::vector<double> &W, int Nx, int Ny, 
   sdi=-dt*D/pow(dx,2);
   ssdi=-dt*D/pow(dy,2);
 
-  if (me==0) {//domaine 1
+  int N;
 
-    for (int j = 0; j < Ny; j++) {
-      for (int i = 0; i < N; i++) {
+  if (me==0) {N=Nu;} //domaine 1
+  else if (me==1 ) {N=Nv;}//domaine 2
 
-        if (i==N-1) {//dernière ligne
-          W[i+j*N]=(di+D*dt*beta/(alpha*dx))*U[i+j*N]+2*sdi*U[i-1+j*N]+ssdi*U[i+(j-1)*N]+ssdi*U[(j+1)*N];}
+  //construction de la matrice sur le domaine
+  for(int i=0; i< N*Ny; i++){
 
-          else {//toute les autres lignes
-            W[i+j*N]=di*U[i+j*N]+sdi*U[i+1+j*N]+sdi*U[i-1+j*N]+ssdi*U[i+(j-1)*N]+ssdi*U[(j+1)*N];}
-          }
-        }
+    //remplissage des termes diagonaux du bloc diagonal
+    if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la dernière ligne
+      col.push_back(i);
+      row.push_back(i);
+      val.push_back(di+D*dt*beta/(dx*alpha));}
+
+    else if((i+1)%N==1 && me==1){//domaine 2 //modification de la première ligne
+      col.push_back(i);
+      row.push_back(i);
+      val.push_back(di+D*dt*beta/(dx*alpha));}
+
+    else{
+      col.push_back(i);
+      row.push_back(i);
+      val.push_back(di);}
+
+    if((i+1)>=N*Ny){} //test de la dernière ligne/colonne
+
+    //remplissage des termes de la sur-diagonale et sous-diagonale du bloc diagonal
+    else{
+
+      col.push_back(i+1);//sur-diag inchangée quelque soit le domaine
+      row.push_back(i);
+      val.push_back(sdi);
+
+      if ((i+1)%N==N-1 && me==0) {//domaine 1
+        col.push_back(i);//sous-diag
+        row.push_back(i+1);
+        val.push_back(2*sdi);}
+
+      else if (i%N==N-1 && me==1) {// domaine 2
+        col.push_back(i);//sous-diag
+        row.push_back(i+1);
+        val.push_back(2*sdi);}
+
+      else{
+        col.push_back(i); //sous-diagonale
+        row.push_back(i+1);
+        val.push_back(sdi);}
       }
 
-      else if (me==1) {//domaine 2
-
-        for (int j = 0; j < Ny; j++) {
-          for (int i = 0; i < N; i++) {
-
-            if (i==0) {//première ligne
-              W[i+j*N]=(di+D*dt*beta/(alpha*dx))*U[i+j*N]+2*sdi*U[i+1+j*N]+ssdi*U[i+(j-1)*N]+ssdi*U[(j+1)*N];}
-
-              else {//toute les autres lignes
-                W[i+j*N]=di*U[i+j*N]+sdi*U[i+1+j*N]+sdi*U[i-1+j*N]+ssdi*U[i+(j-1)*N]+ssdi*U[(j+1)*N];}
-              }
-            }
-          }
-        }
+    //remplissage des blocs sur la sur-diagonale et la sous-diagonale par blocs
+    if(i+Ny<N*Ny){
+      col.push_back(i); //stockage de la sous-sous-diagonale
+      row.push_back(i+Ny);
+      val.push_back(ssdi);
+      col.push_back(i+Ny); //stockage de la sur-sur-diagonale (symetrie)
+      row.push_back(i);
+      val.push_back(ssdi);}
+  }
+}
 
 
 // ---------------------------------------------------------
-//fonction qui remplit le vecteur second mambre du problème
+//fonction qui remplit le vecteur second membre du problème
 
 void secondMembre_seq(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny, int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int h_part, int me){
 
