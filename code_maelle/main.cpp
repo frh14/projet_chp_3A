@@ -130,7 +130,7 @@ int main(int argc, char** argv){
       secondMembre(S1,U,V0,Nx,Ny,Nu,dt,t,Lx,Ly,D,mode,alpha,beta,0);
       secondMembre(S2,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
-      //résolution du systéme linéaire sur chaque sous-domaine
+      //resolution du systeme lineaire sur chaque sous-domaine
       U = BCGS(S1,0);
       V = BCGS(S2,0);
 

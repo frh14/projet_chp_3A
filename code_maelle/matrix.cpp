@@ -10,6 +10,7 @@
 
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
+
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
   double di(0),sdi(0),ssdi(0);
@@ -28,6 +29,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la derniere ligne
       col.push_back(i);
       row.push_back(i);
+
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
 
@@ -36,6 +38,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       row.push_back(i);
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
+
 
     else{
       col.push_back(i);
