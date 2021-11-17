@@ -5,129 +5,125 @@
 #include "fonctions.hpp"
 #include "matrix.hpp"
 
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-//fonction qui remplit la matrice de diffusion du problème
+//------------------------------------------------------------------------------------------------------------------------
+//fonction qui remplit la matrice de diffusion sur un sous domaine
 
-void sparseMatrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &value, int Nx, int Ny, double Lx, double Ly, double D, double dt){
-  // Fonction qui remplt la matrice associée au problème avec un stockage coordonnées
+void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
+
+  double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
+
   double di(0),sdi(0),ssdi(0);
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-  di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
-  sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
-  for(int i=0; i<(Nx*Ny); i++){
-    col.push_back(i);
-    row.push_back(i);
-    value.push_back(di);
-    if((i+1)%Nx==0){}
-    else{
-      col.push_back(i); //stockage de la sous-diagonale
-      row.push_back(i+1);
-      value.push_back(sdi);
-      col.push_back(i+1); //stockage de la sur-diagonale (symetrie)
+  sdi=-dt*D/(dx*dx);
+  ssdi=-dt*D/(dy*dy);
+  di=1-2*dt*(sdi+ssdi);
+
+  int N;
+  if (me==0) {N=Nu;} //domaine 1
+  else if (me==1 ) {N=Nv;}//domaine 2
+
+  //construction de la matrice sur le domaine
+  for(int i=0; i< N*Ny; i++){
+
+    //remplissage des termes diagonaux du bloc diagonal
+    if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la dernière ligne
+      col.push_back(i);
       row.push_back(i);
-      value.push_back(sdi);
+      val.push_back(di+D*dt*beta/(dx*alpha));
     }
-    if(i+Nx<Nx*Nx){
-    col.push_back(i); //stockage de la sous-sous-diagonale
-    row.push_back(i+Nx);
-    value.push_back(ssdi);
-    col.push_back(i+Nx); //stockage de la sur-sur-diagonale (symetrie)
-    row.push_back(i);
-    value.push_back(ssdi);
+
+    else if((i+1)%N==1 && me==1){//domaine 2 //modification de la première ligne
+      col.push_back(i);
+      row.push_back(i);
+      val.push_back(di+D*dt*beta/(dx*alpha));
     }
-  }
-}
 
-//-----------------------------------------------------------------------------------------------------------------------
-//fonction qui remplit la matrice de diffusion partielle
-
-void sparseMatrix_parallel(std::vector<int> &row,std::vector<int> &col,std::vector<double> &value, int Nx, int Ny, double Lx, double Ly, double D, double dt,int iBeg,int iEnd){
-  // Fonction qui remplit la matrice associée au problème avec un stockage coordonnées
-  double di(0),sdi(0),ssdi(0),dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-  di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
-  sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
-
-  for(int i=iBeg; i<iEnd+1; i++){
-    col.push_back(i);
-    row.push_back(i);
-    value.push_back(di);}
-
-  for (int i = 0; i < Nx*Ny ; i++) {
-    if((i+1)%Nx==0){}
     else{
-      if (i+1<=iEnd && i+1>=iBeg) {
-        col.push_back(i); //stockage de la sous-diagonale
+      col.push_back(i);
+      row.push_back(i);
+      val.push_back(di);
+    }
+
+    if((i+1)>=N*Ny){} //test de la dernière ligne/colonne
+
+    //remplissage des termes de la sur-diagonale et sous-diagonale du bloc diagonal
+    else{
+
+      col.push_back(i+1);//sur-diag inchangée quelque soit le domaine
+      row.push_back(i);
+      val.push_back(sdi);
+
+      if ((i+1)%N==N-1 && me==0) {//domaine 1
+        col.push_back(i);//sous-diag
         row.push_back(i+1);
-        value.push_back(sdi);}
+        val.push_back(2*sdi);
+      }
 
-      if(i<=iEnd && i>=iBeg)
-      {col.push_back(i+1); //stockage de la sur-diagonale (symetrie)
-      row.push_back(i);
-      value.push_back(sdi);
+      else if (i%N==N-1 && me==1) {// domaine 2
+        col.push_back(i);//sous-diag
+        row.push_back(i+1);
+        val.push_back(2*sdi);
+      }
+
+      else{
+        col.push_back(i); //sous-diagonale
+        row.push_back(i+1);
+        val.push_back(sdi);
+      }
     }
-  }
 
-      if(i+Nx<Nx*Nx && i+Nx<=iEnd && i+Nx>=iBeg){
+    //remplissage des blocs sur la sur-diagonale et la sous-diagonale par blocs
+    if(i+Ny<N*Ny){
       col.push_back(i); //stockage de la sous-sous-diagonale
-      row.push_back(i+Nx);
-      value.push_back(ssdi);}
-
-      if(i+Nx<Nx*Nx && i<=iEnd && i>=iBeg){
-      col.push_back(i+Nx); //stockage de la sur-sur-diagonale (symetrie)
+      row.push_back(i+Ny);
+      val.push_back(ssdi);
+      col.push_back(i+Ny); //stockage de la sur-sur-diagonale (symetrie)
       row.push_back(i);
-      value.push_back(ssdi);
-      }
+      val.push_back(ssdi);}
+    }
   }
-}
 
-// ---------------------------------------------------------
-//fonction qui remplit le vecteur second membre du problème
 
-void secondMembre(std::vector<double> &S,std::vector<double> U, int Nx, int Ny,double dt, double t, double Lx, double Ly, double D, int mode){
-  // Fonction qui remplit le second membre
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-  for(int i=0; i<Nx; i++){
+  // ---------------------------------------------------------
+  //fonction qui remplit le vecteur second membre du problème
+
+  void secondMembre_seq(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int h_part, int me){
+
+    // Fonction qui remplit le second membre selon le domaine où l'on se trouve
+
+    double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
+    double gamma=D*dt/(dx*dx);
+    double eta=2*D*dt*beta/(dx*alpha);
+
     for(int j=0; j<Ny; j++){
-      S[i+j*Nx]=U[i+j*Nx]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
-      if (j==0) {
-        S[i+j*Nx]+=D*dt/pow(dy,2)*g((i+1)*dx,0,mode);
+      if (me==0){ //domaine 1
+        for(int i=0; i<Nu; i++){
+
+          S[i+j*Nu]=U[i+j*Nu]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+
+          if (j==0) S[i+j*Nu]+=D*dt/dy*dy*g((i+1)*dx,0,mode);
+
+          else if (j==Ny-1) S[i+j*Nu]+=D*dt/(dy*dy)*g((i+1)*dx,Ly,mode);
+
+          else if (i==0) S[i+j*Nu]+=D*dt/dx*dx*h(0,(j+1)*dy,mode);
+
+          else if (i==Nu-1) S[i+j*Nu]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
+        }
       }
-      else if (j==Ny-1) {
-        S[i+j*Nx]+=D*dt/pow(dy,2)*g((i+1)*dx,Ny+1,mode);
-      }
-      else if (i==0) {
-        S[i+j*Nx]+=D*dt/pow(dx,2)*h(0,(j+1)*dy,mode);
-      }
-      else if (i==Nx-1) {
-        S[i+j*Nx]+=D*dt/pow(dx,2)*h(Nx+1,(j+1)*dy,mode);
+      else if (me==1){ //domaine 2
+        // Invariant: Nu+Nv-h_part = Nx
+        for(int i=0; i<Nv; i++){
+
+          S[i+j*Nu]=U[i+j*Nv]+dt*f((Nu-h_part+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+
+          if (j==0) S[i+j*Nv]+=D*dt/dy*dy*g((Nu-h_part+i+1)*dx,0,mode);
+
+          else if (j==Ny-1) S[i+j*Nv]+=D*dt/(dy*dy)*g((Nu-h_part+i+1)*dx,Ly,mode);
+
+          else if (i==0) S[i+j*Nv]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
+
+          else if (i==Nv-1) S[i+j*Nv]+=D*dt/dx*dx*h(Lx,(j+1)*dy,mode);
+        }
       }
     }
+
   }
-}
-
-//-----------------------------------------------------------------------------------
-//fonction qui remplit le vecteur second membre partiel
-
-void secondMembre_parallel(std::vector<double> &S,std::vector<double> U, int Nx, int Ny,double dt, double t, double Lx, double Ly, double D, int mode,int iBeg,int iEnd){
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-
-  for (int k = 0; k < iEnd-iBeg+1; k++) {
-    int i=(k+iBeg)%Nx;
-    int j=(k+iBeg)/Ny;
-    S[k]=U[k]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
-    if (j==0) {
-      S[k]+=D*dt/pow(dy,2)*g((i+1)*dx,0,mode);
-    }
-    else if (j==Ny-1) {
-      S[k]+=D*dt/pow(dy,2)*g((i+1)*dx,Ny+1,mode);
-    }
-    else if (i==0) {
-      S[k]+=D*dt/pow(dx,2)*h(0,(j+1)*dy,mode);
-    }
-    else if (i==Nx-1) {
-      S[k]+=D*dt/pow(dx,2)*h(Nx+1,(j+1)*dy,mode);
-    }
-  }
-}

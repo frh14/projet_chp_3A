@@ -2,7 +2,6 @@
 #include<cstdio>
 #include<cstdlib>
 #include<math.h>
-//#include<mpi.h>
 #include"solveur.hpp"
 #include"charge.hpp"
 
