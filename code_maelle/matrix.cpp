@@ -10,6 +10,7 @@
 
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
+
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
   double di(0),sdi(0),ssdi(0);
@@ -18,6 +19,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
   di=1-2*dt*(sdi+ssdi);
 
   int N;
+
   if (me==0) {N=Nu;} //domaine 1
   else if (me==1 ) {N=Nv;}//domaine 2
 
@@ -28,14 +30,17 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la dernière ligne
       col.push_back(i);
       row.push_back(i);
+
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
+
 
     else if((i+1)%N==1 && me==1){//domaine 2 //modification de la première ligne
       col.push_back(i);
       row.push_back(i);
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
+
 
     else{
       col.push_back(i);
@@ -78,7 +83,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       val.push_back(ssdi);
       col.push_back(i+Ny); //stockage de la sur-sur-diagonale (symetrie)
       row.push_back(i);
-      val.push_back(ssdi);}
+      val.push_back(ssdi); 
     }
   }
 
