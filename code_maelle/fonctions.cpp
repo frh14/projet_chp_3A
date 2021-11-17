@@ -2,9 +2,8 @@
 
 #include <math.h>
 
-//module qui contient les fonctions utiles à la résolution du problème
+//module qui contient les fonctions utiles à la resolution du probleme
 //notamment les fonctions de conditions de limite
-
 
 //----------------------------------------------------------------------------
 
