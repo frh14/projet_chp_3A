@@ -20,7 +20,6 @@ using namespace std;
 //le domaine est scindé en deux selon ses lignes
 
 
-
 int main(int argc, char** argv) {
 
   // Lecture des données dans le fichier paramètres (parameters.txt)
@@ -105,10 +104,9 @@ for (int i = 0; i < Nv*Ny; i++) {
 
   //création des abcisses et ordonnées des points du maillage
   std::vector<double> x_tab(Nx),y_tab(Ny);
-  for (int i = 0; i < Nx; i++) {
-    x_tab[i]=(i+1)*Lx/(Nx+1);}
-  for (int j = 0; j < Ny; j++) {
-    y_tab[j]=(j+1)*Ly/(Ny+1);}
+
+  for (int i = 0; i < Nx; i++) x_tab[i]=(i+1)*Lx/(Nx+1);
+  for (int j = 0; j < Ny; j++) y_tab[j]=(j+1)*Ly/(Ny+1);
 
   //schema en temps
   for (int k = 0; k < Nt; k++) {

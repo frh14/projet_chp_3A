@@ -3,7 +3,7 @@
 #include <math.h>
 
 //module qui contient les fonctions utiles à la résolution du problème
-//notamment les fonctions de conditions de limite 
+//notamment les fonctions de conditions de limite
 
 
 //----------------------------------------------------------------------------
@@ -16,7 +16,7 @@ double f(double x,double y,double t, double Lx, double Ly, int mode){
     return sin(x)+cos(y);
   }
   if(mode==3){
-    return exp(-pow(x-(Lx/2),2))*exp(-pow(y-(Ly/2),2))*cos((2*atan(1))*t);
+    return exp(-(x-(Lx/2))*(x-(Lx/2)))*exp(-(y-(Ly/2))*(y-(Ly/2))*cos((2*atan(1))*t);
   }
 }
 

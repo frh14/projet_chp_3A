@@ -10,12 +10,13 @@
 
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
+
+  double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
   double di(0),sdi(0),ssdi(0);
-  di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
-  sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
+  sdi=-dt*D/(dx*dx);
+  ssdi=-dt*D/(dy*dy);
+  di=1-2*dt*(sdi+ssdi);
 
   int N;
 
@@ -29,17 +30,23 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la dernière ligne
       col.push_back(i);
       row.push_back(i);
-      val.push_back(di+D*dt*beta/(dx*alpha));}
+
+      val.push_back(di+D*dt*beta/(dx*alpha));
+    }
+
 
     else if((i+1)%N==1 && me==1){//domaine 2 //modification de la première ligne
       col.push_back(i);
       row.push_back(i);
-      val.push_back(di+D*dt*beta/(dx*alpha));}
+      val.push_back(di+D*dt*beta/(dx*alpha));
+    }
+
 
     else{
       col.push_back(i);
       row.push_back(i);
-      val.push_back(di);}
+      val.push_back(di);
+    }
 
     if((i+1)>=N*Ny){} //test de la dernière ligne/colonne
 
@@ -53,18 +60,21 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       if ((i+1)%N==N-1 && me==0) {//domaine 1
         col.push_back(i);//sous-diag
         row.push_back(i+1);
-        val.push_back(2*sdi);}
+        val.push_back(2*sdi);
+      }
 
       else if (i%N==N-1 && me==1) {// domaine 2
         col.push_back(i);//sous-diag
         row.push_back(i+1);
-        val.push_back(2*sdi);}
+        val.push_back(2*sdi);
+      }
 
       else{
         col.push_back(i); //sous-diagonale
         row.push_back(i+1);
-        val.push_back(sdi);}
+        val.push_back(sdi);
       }
+    }
 
     //remplissage des blocs sur la sur-diagonale et la sous-diagonale par blocs
     if(i+Ny<N*Ny){
@@ -73,40 +83,52 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       val.push_back(ssdi);
       col.push_back(i+Ny); //stockage de la sur-sur-diagonale (symetrie)
       row.push_back(i);
-      val.push_back(ssdi);}
-  }
-}
-
-
-// ---------------------------------------------------------
-//fonction qui remplit le vecteur second membre du problème
-
-void secondMembre_seq(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny, int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int h_part, int me){
-
-  // Fonction qui remplit le second membre selon le domaine où l'on se trouve
-
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
-
-  for(int j=0; j<Ny; j++){
-    for(int i=0; i<N; i++){
-
-      S[i+j*Nx]=U[i+j*N]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
-
-      if (j==0) {
-        S[i+j*N]+=D*dt/pow(dy,2)*g((i+1)*dx,0,mode);
-      }
-
-      else if (j==Ny-1) {
-        S[i+j*N]+=D*dt/pow(dy,2)*g((i+1)*dx,Ny+1,mode);
-      }
-
-      else if (i==0) {
-        S[i+j*N]+=D*dt/pow(dx,2)*h(0,(j+1)*dy,mode);
-      }
-
-      else if (i==Nx-1) {
-        S[i+j*N]+=D*dt/pow(dx,2)*h(Nx+1,(j+1)*dy,mode);
-      }
+      val.push_back(ssdi); 
     }
   }
-}
+
+
+  // ---------------------------------------------------------
+  //fonction qui remplit le vecteur second membre du problème
+
+  void secondMembre_seq(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int h_part, int me){
+
+    // Fonction qui remplit le second membre selon le domaine où l'on se trouve
+
+    double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
+    double gamma=D*dt/(dx*dx);
+    double eta=2*D*dt*beta/(dx*alpha);
+
+    for(int j=0; j<Ny; j++){
+      if (me==0){ //domaine 1
+        for(int i=0; i<Nu; i++){
+
+          S[i+j*Nu]=U[i+j*Nu]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+
+          if (j==0) S[i+j*Nu]+=D*dt/dy*dy*g((i+1)*dx,0,mode);
+
+          else if (j==Ny-1) S[i+j*Nu]+=D*dt/(dy*dy)*g((i+1)*dx,Ly,mode);
+
+          else if (i==0) S[i+j*Nu]+=D*dt/dx*dx*h(0,(j+1)*dy,mode);
+
+          else if (i==Nu-1) S[i+j*Nu]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
+        }
+      }
+      else if (me==1){ //domaine 2
+        // Invariant: Nu+Nv-h_part = Nx
+        for(int i=0; i<Nv; i++){
+
+          S[i+j*Nu]=U[i+j*Nv]+dt*f((Nu-h_part+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+
+          if (j==0) S[i+j*Nv]+=D*dt/dy*dy*g((Nu-h_part+i+1)*dx,0,mode);
+
+          else if (j==Ny-1) S[i+j*Nv]+=D*dt/(dy*dy)*g((Nu-h_part+i+1)*dx,Ly,mode);
+
+          else if (i==0) S[i+j*Nv]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
+
+          else if (i==Nv-1) S[i+j*Nv]+=D*dt/dx*dx*h(Lx,(j+1)*dy,mode);
+        }
+      }
+    }
+
+  }
