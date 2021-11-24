@@ -69,37 +69,7 @@ int main(int argc, char** argv){
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  /*//affichage pour phase de test
-  printf("Nx=%d et Ny=%d \n",Nx,Ny);
-  printf("Nu=%d et Nv=%d \n",Nu,Nv);
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-  double di(0),sdi(0),ssdi(0);
-  di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
-  sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
-  printf("------------------------------------------------------------------------\n");
-  printf("di=%f \n",di);
-  printf("sdi=%f \n",sdi);
-  printf("ssdi=%f \n",ssdi);
-  printf("di+D*dt*beta/(dx*alpha))=%f \n",di+D*dt*beta/(dx*alpha));
-  printf("2*sdi=%f \n",2*sdi);
-
-  printf("------------------------------------------------------------------------\n");
-  printf("------------------------------------------------------------------------\n");
-  printf("matrice domaine 1 de taille %d \n",Nu*Ny);
-  for (int i = 0; i < Nu*Ny; i++) {
-  for (int k = 0; k < rowu.size(); k++) {
-  if (rowu[k]==i) {
-  printf(" ligne=%d , colonne=%d , valeur=%f \n",rowu[k],colu[k],valu[k]);}}}
-
-  printf("------------------------------------------------------------------------\n");
-  printf("matrice domaine 2 de taille %d \n",Nv*Ny);
-  for (int i = 0; i < Nv*Ny; i++) {
-  for (int k = 0; k < rowv.size(); k++) {
-  if (rowv[k]==i) {
-  printf(" ligne=%d , colonne=%d , valeur=%f \n",rowv[k],colv[k],valv[k]);}}}*/
-
-  std::string prefixe = "solution_approchée_seq_t=";
+  std::string prefixe = "solution_approchee_seq_t=";
 
   //creation des abcisses et ordonnees des points du maillage
   std::vector<double> x_tab(Nx), y_tab(Ny);
@@ -131,21 +101,21 @@ int main(int argc, char** argv){
       secondMembre(S2,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      U = BCGS(S1,0);
-      V = BCGS(S2,0);
+      //U = BICG(S1,0);
+      //V = BICG(S2,0);
 
       //mise a jour des stencils
       for (int j = 0; j < Ny; j++){
         U0[j] = V[Ny*(h_part-1)+j];
         U0[Ny+j] = V[Ny*(h_part)+j];
         U0[2*Ny+j] = V[Ny*(h_part+1)+j];
-      }
-      for (int j = 0; j < Ny; j++){
         V0[j] = U[Ny*(Nu-h_part-1)+j];
         V0[Ny+j] = U[Ny*(Nu-h_part)+j];
         V0[2*Ny+j] = U[Ny*(Nu-h_part+1)+j];
       }
-      // Mettre une evaluation de l'erreur pour la condition d'arret error
+
+      // Evaluation de l'erreur pour la condition d'arret error
+
       iteschwz++;
     }
 
@@ -162,9 +132,9 @@ int main(int argc, char** argv){
   }
   gettimeofday(&t2, NULL);
 
-  printf("résolution séquentielle de paramètres: \n");
+  printf("resolution sequentielle de parametres: \n");
   printf("Nx=%d, Ny=%d, Lx=%f , Ly=%f, D=%f, dt=%f , h_part=%d, alpha=%f, beta=%f \n",Nx,Ny,Lx,Ly,D,dt,h_part,alpha,beta);
-  printf("temps écoulé =%lu \n",t2.tv_usec - t1.tv_usec);
+  printf("temps ecoule =%lu \n",t2.tv_usec - t1.tv_usec);
 
   //-----------------------------------------------------------------------------------------------------------------------------------------
   //fin de la resolution sequentielle

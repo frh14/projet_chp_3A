@@ -29,7 +29,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la derniere ligne
       col.push_back(i);
       row.push_back(i);
-
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
 
@@ -98,35 +97,35 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     double eta=2*D*dt*beta/(dx*alpha);
 
     for(int j=0; j<Ny; j++){
-      if (me==0){ //domaine 1
-        for(int i=0; i<N; i++){
+      for(int i=0; i<N; i++){
 
-          S[i+j*Nu]=U[i+j*N]+dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        S[i+j*N]=U[i+j*N]
 
-          if (j==0) S[i+j*N]+=D*dt/dy*dy*g((i+1)*dx,0,mode);
+        if (me==0){ //domaine 1
 
-          else if (j==Ny-1) S[i+j*N]+=D*dt/(dy*dy)*g((i+1)*dx,Ly,mode);
+          S[i+j*N]+=dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-          else if (i==0) S[i+j*N]+=D*dt/dx*dx*h(0,(j+1)*dy,mode);
+          if (j==0) S[i+j*N]+=D*dt*g((i+1)*dx,0,mode)/(dy*dy);
+
+          else if (j==Ny-1) S[i+j*N]+=D*dt*g((i+1)*dx,Ly,mode)/(dy*dy);
+
+          if (i==0) S[i+j*N]+=D*dt*h(0,(j+1)*dy,mode)/(dx*dx);
 
           else if (i==N-1) S[i+j*N]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
         }
-      }
-      else if (me==1){ //domaine 2
-        // Invariant: Nu+Nv-h_part = Nx
-        for(int i=0; i<N; i++){
+        else if (me==1){ //domaine 2
+          // Invariant: Nu+Nv-h_part = Nx
 
-          S[i+j*Nu]=U[i+j*N]+dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+          S[i+j*N]=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-          if (j==0) S[i+j*N]+=D*dt/dy*dy*g((Nx-N+i+1)*dx,0,mode);
+          if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
 
-          else if (j==Ny-1) S[i+j*N]+=D*dt/(dy*dy)*g((Nx-N+i+1)*dx,Ly,mode);
+          else if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
 
-          else if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
+          if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
 
-          else if (i==N-1) S[i+j*N]+=D*dt/dx*dx*h(Lx,(j+1)*dy,mode);
+          else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);
         }
       }
     }
-
   }
