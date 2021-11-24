@@ -69,36 +69,6 @@ int main(int argc, char** argv){
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  /*//affichage pour phase de test
-  printf("Nx=%d et Ny=%d \n",Nx,Ny);
-  printf("Nu=%d et Nv=%d \n",Nu,Nv);
-  double dx=Lx/(Nx+1),dy=Ly/(Ny+1);
-  double di(0),sdi(0),ssdi(0);
-  di=1+2*dt*(1/pow(dx,2)+1/pow(dy,2));
-  sdi=-dt*D/pow(dx,2);
-  ssdi=-dt*D/pow(dy,2);
-  printf("------------------------------------------------------------------------\n");
-  printf("di=%f \n",di);
-  printf("sdi=%f \n",sdi);
-  printf("ssdi=%f \n",ssdi);
-  printf("di+D*dt*beta/(dx*alpha))=%f \n",di+D*dt*beta/(dx*alpha));
-  printf("2*sdi=%f \n",2*sdi);
-
-  printf("------------------------------------------------------------------------\n");
-  printf("------------------------------------------------------------------------\n");
-  printf("matrice domaine 1 de taille %d \n",Nu*Ny);
-  for (int i = 0; i < Nu*Ny; i++) {
-  for (int k = 0; k < rowu.size(); k++) {
-  if (rowu[k]==i) {
-  printf(" ligne=%d , colonne=%d , valeur=%f \n",rowu[k],colu[k],valu[k]);}}}
-
-  printf("------------------------------------------------------------------------\n");
-  printf("matrice domaine 2 de taille %d \n",Nv*Ny);
-  for (int i = 0; i < Nv*Ny; i++) {
-  for (int k = 0; k < rowv.size(); k++) {
-  if (rowv[k]==i) {
-  printf(" ligne=%d , colonne=%d , valeur=%f \n",rowv[k],colv[k],valv[k]);}}}*/
-
   std::string prefixe = "solution_approchée_seq_t=";
 
   //creation des abcisses et ordonnees des points du maillage
