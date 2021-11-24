@@ -1,4 +1,5 @@
 #include "fonctions.hpp"
+#include "solveur.hpp"
 
 #include <math.h>
 
@@ -15,7 +16,7 @@ double f(double x,double y,double t, double Lx, double Ly, int mode){
     return sin(x)+cos(y);
   }
   if(mode==3){
-    return exp(-(x-(Lx/2))*(x-(Lx/2)))*exp(-(y-(Ly/2))*(y-(Ly/2))*cos((2*atan(1))*t);
+    return exp(-(x-(Lx/2))*(x-(Lx/2)))*exp(-(y-(Ly/2))*(y-(Ly/2))*cos((2*atan(1))*t));
   }
 }
 
@@ -51,19 +52,18 @@ double h(double x,double y,int mode){
 
 double maj_error(float * U , float * V , int h , int Ny , int Nu)
 {
-  double error , norme_u , norme_v , error_max(0) ;
+  double error , error_max(0) ;
   double * Vect_loc ;
-  Vect_loc = (double) malloc(Ny*sizeof(double)) ;
+  Vect_loc = (double *) malloc(Ny*sizeof(double)) ;
 
    for (int i=0 ; i< h ; i++ )
    {
      for (int j=0 ; j<Ny ; j++)
      {
        Vect_loc[j] = U[(Nu-h+i)*Ny+j] - V[(i*Ny)+j] ;
-       error = norme2(Vect_loc) ;
+       error = norm2(Vect_loc) ;
        if (error>error_max) error_max=error ;
-
      }
    }
-   return error_max
+   return error_max ;
 }

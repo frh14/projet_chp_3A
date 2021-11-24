@@ -69,7 +69,8 @@ int main(int argc, char** argv){
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  std::string prefixe = "solution_approchee_seq_t=";
+
+  std::string prefixe = "solution_approchée_seq_t=";
 
   //creation des abcisses et ordonnees des points du maillage
   std::vector<double> x_tab(Nx), y_tab(Ny);
