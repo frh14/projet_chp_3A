@@ -177,23 +177,11 @@ double ps(std::vector<double> x,std::vector<double> y){
 //et calcul le vecteur y=AX
 
 void mulSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<double> val, std::vector<double> &y, std::vector<double> x) {
+  for (int i = 0; i < y.size(); i++) {
+    y[i]=0.;}
+  
   for (int k = 0; k < row.size(); k++){
     y[row[k]]+=val[k]*x[col[k]];}
 }
 
-//-----------------------------------------------------------------------------------------------------------------
-//produit matrice/vecteur pour une application en paralléle
-//fonction qui prend en entrée une matrice A sous la forme:
-//vecteur valeur->contient la valeur des termes non nuls de la matrice
-//vecteur ligne et colonne->contiennent les indices des termes non nuls
-//le vecteur x sous la forme
-//x_val->valeur des composantes de x
-//x_indice -> indices des composantes de x
-//et calcul le vecteur y=AX
 
-void mulSparseMatrix_2(std::vector<int> row, std::vector<int> col, std::vector<double> val, std::vector<double> &y,int iBeg,int iEnd,std::vector<double> x_val,std::vector<int> x_indice){
-  for (int k = 0; k < row.size(); k++) {
-    for (int i = 0; i < x_indice.size(); i++) {
-      if (x_indice[i]==col[k] && row[k]<=iEnd && row[k]>=iBeg) {
-        y[row[k]-iBeg]+=val[k]*x_val[i];}}}
-  }
