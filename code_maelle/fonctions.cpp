@@ -50,7 +50,7 @@ double h(double x,double y,int mode){
 
 
 
-double maj_error(float * U , float * V , int h , int Ny , int Nu)
+double maj_error(std::vector<double> U , std::vector<double> V , int h , int Ny , int N)
 {
   double error , error_max(0) ;
   std::vector<double> Vect_loc(Ny) ;
@@ -59,7 +59,7 @@ double maj_error(float * U , float * V , int h , int Ny , int Nu)
    {
      for (int j=0 ; j<Ny ; j++)
      {
-       Vect_loc[j] = U[(Nu-h+i)*Ny+j] - V[(i*Ny)+j] ;
+       Vect_loc[j] = U[(N-h+i)*Ny+j] - V[(i*Ny)+j] ;
        error = norm2(Vect_loc) ;
        if (error>error_max) error_max=error ;
      }

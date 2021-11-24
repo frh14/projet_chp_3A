@@ -84,7 +84,7 @@ int main(int argc, char** argv){
   //Parametres d'arret pour Schwarz
   double errschwz = 0.00000001;
   int maxschwz = Nx*Ny;
-  double error; int iteschwz;
+  double error(1); int iteschwz(0);
 
   //schema en temps
   for (int k = 0; k < Nt; k++) {
@@ -117,6 +117,7 @@ int main(int argc, char** argv){
       }
 
       // Evaluation de l'erreur pour la condition d'arret error
+      error = maj_error(U,V,h_part,Ny,Nu);
 
       iteschwz++;
     }
