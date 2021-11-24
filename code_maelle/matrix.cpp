@@ -83,6 +83,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       val.push_back(ssdi);
     }
   }
+}
 
 
   // ---------------------------------------------------------
@@ -99,7 +100,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     for(int j=0; j<Ny; j++){
       for(int i=0; i<N; i++){
 
-        S[i+j*N]=U[i+j*N]
+        S[i+j*N]=U[i+j*N] ;
 
         if (me==0){ //domaine 1
 

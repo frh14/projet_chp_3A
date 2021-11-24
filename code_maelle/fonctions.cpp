@@ -53,8 +53,7 @@ double h(double x,double y,int mode){
 double maj_error(float * U , float * V , int h , int Ny , int Nu)
 {
   double error , error_max(0) ;
-  double * Vect_loc ;
-  Vect_loc = (double *) malloc(Ny*sizeof(double)) ;
+  std::vector<double> Vect_loc(Ny) ;
 
    for (int i=0 ; i< h ; i++ )
    {
