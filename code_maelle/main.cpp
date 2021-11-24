@@ -69,6 +69,7 @@ int main(int argc, char** argv){
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
+
   std::string prefixe = "solution_approchée_seq_t=";
 
   //creation des abcisses et ordonnees des points du maillage
@@ -101,21 +102,21 @@ int main(int argc, char** argv){
       secondMembre(S2,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      U = BCGS(S1,0);
-      V = BCGS(S2,0);
+      //U = BICG(S1,0);
+      //V = BICG(S2,0);
 
       //mise a jour des stencils
       for (int j = 0; j < Ny; j++){
         U0[j] = V[Ny*(h_part-1)+j];
         U0[Ny+j] = V[Ny*(h_part)+j];
         U0[2*Ny+j] = V[Ny*(h_part+1)+j];
-      }
-      for (int j = 0; j < Ny; j++){
         V0[j] = U[Ny*(Nu-h_part-1)+j];
         V0[Ny+j] = U[Ny*(Nu-h_part)+j];
         V0[2*Ny+j] = U[Ny*(Nu-h_part+1)+j];
       }
-      // Mettre une evaluation de l'erreur pour la condition d'arret error
+
+      // Evaluation de l'erreur pour la condition d'arret error
+
       iteschwz++;
     }
 
@@ -132,9 +133,9 @@ int main(int argc, char** argv){
   }
   gettimeofday(&t2, NULL);
 
-  printf("résolution séquentielle de paramètres: \n");
+  printf("resolution sequentielle de parametres: \n");
   printf("Nx=%d, Ny=%d, Lx=%f , Ly=%f, D=%f, dt=%f , h_part=%d, alpha=%f, beta=%f \n",Nx,Ny,Lx,Ly,D,dt,h_part,alpha,beta);
-  printf("temps écoulé =%lu \n",t2.tv_usec - t1.tv_usec);
+  printf("temps ecoule =%lu \n",t2.tv_usec - t1.tv_usec);
 
   //-----------------------------------------------------------------------------------------------------------------------------------------
   //fin de la resolution sequentielle
