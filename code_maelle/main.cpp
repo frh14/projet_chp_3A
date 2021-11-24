@@ -60,7 +60,7 @@ int main(int argc, char** argv){
   std::vector<double> U0(3*Ny); //domaine 1 pour le domaine 2
   std::vector<double> V0(3*Ny); //domaine 2 pour le domaine 1
 
-  //construction des matrices de resolution
+  //construction des matrices de resolution sur chaque sous domaine
   std::vector<int> rowu, rowv;
   std::vector<int> colu, colv;
   std::vector<double> valu, valv;
@@ -69,17 +69,11 @@ int main(int argc, char** argv){
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  std::string prefixe = "solution_approchée_seq_t=";
-
-  //creation des abcisses et ordonnees des points du maillage
-  std::vector<double> x_tab(Nx), y_tab(Ny);
-  for (int i = 0; i < Nx; i++) x_tab[i]=(i+1)*Lx/(Nx+1);
-  for (int j = 0; j < Ny; j++) y_tab[j]=(j+1)*Ly/(Ny+1);
-
   int Nt=100; // nombre d'iterations en temps
-  //double e=0.00000001; //tolerance pour le GC
-  //int kmax=Nx*Ny; //iteration max du GC
-  // Parametres d'arret pour Schwarz
+  double e=0.00000001; //tolerance pour le GC
+  int kmax=Nx*Ny; //iteration max du BICG
+
+  //Parametres d'arret pour Schwarz
   double errschwz = 0.00000001;
   int maxschwz = Nx*Ny;
   double error; int iteschwz;
@@ -90,19 +84,19 @@ int main(int argc, char** argv){
     double t = k*dt; //temps de l'experience
 
     //Initialisation des stencils
-    U0=1; V0=1;
+    for (int i = 0; i < U0.size(); i++) {U0[i]=1.,V0[i]=1.;}
 
     //Boucle de Schwarz
     while ((iteschwz <= maxschwz)||(error >= errschwz)){
       //construction du second membre sur chaque sous-domaine
-      std::vector<double> S1(Nx*Ny,0);
-      std::vector<double> S2(Nx*Ny,0);
-      secondMembre(S1,U,V0,Nx,Ny,Nu,dt,t,Lx,Ly,D,mode,alpha,beta,0);
-      secondMembre(S2,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
+      std::vector<double> Su(Nu*Ny,0);
+      std::vector<double> Sv(Nv*Ny,0);
+      secondMembre(Su,U,V0,Nx,Ny,Nu,dt,t,Lx,Ly,D,mode,alpha,beta,0);
+      secondMembre(Sv,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      U = BCGS(S1,0);
-      V = BCGS(S2,0);
+      BICG(rowu,colu,valu,U,Su,e,kmax,Nu,Ny);
+      BICG(rowv,colv,valv,V,Sv,e,kmax,Nv,Ny);
 
       //mise a jour des stencils
       for (int j = 0; j < Ny; j++){
