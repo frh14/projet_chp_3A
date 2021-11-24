@@ -46,3 +46,24 @@ double h(double x,double y,int mode){
       return 1;
   }
 }
+
+
+
+double maj_error(float * U , float * V , int h , int Ny , int Nu)
+{
+  double error , norme_u , norme_v , error_max(0) ;
+  double * Vect_loc ;
+  Vect_loc = (double) malloc(Ny*sizeof(double)) ;
+
+   for (int i=0 ; i< h ; i++ )
+   {
+     for (int j=0 ; j<Ny ; j++)
+     {
+       Vect_loc[j] = U[(Nu-h+i)*Ny+j] - V[(i*Ny)+j] ;
+       error = norme2(Vect_loc) ;
+       if (error>error_max) error_max=error ;
+
+     }
+   }
+   return error_max
+}
