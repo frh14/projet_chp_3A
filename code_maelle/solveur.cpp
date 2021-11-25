@@ -138,7 +138,6 @@ void CG(std::vector<int> row,std::vector<int> col,std::vector<double> val,std::v
       norm=norm2(r);
     }
 
-      printf("k final=%d \n",k);
 
   }
 
@@ -179,9 +178,7 @@ double ps(std::vector<double> x,std::vector<double> y){
 void mulSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<double> val, std::vector<double> &y, std::vector<double> x) {
   for (int i = 0; i < y.size(); i++) {
     y[i]=0.;}
-  
+
   for (int k = 0; k < row.size(); k++){
     y[row[k]]+=val[k]*x[col[k]];}
 }
-
-
