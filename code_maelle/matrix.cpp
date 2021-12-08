@@ -24,32 +24,19 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
 
   //construction de la matrice sur le domaine
   for(int i=0; i< N*Ny; i++){
-
     //remplissage des termes diagonaux du bloc diagonal
     if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la derniere ligne
-      col.push_back(i);
-      row.push_back(i);
-      val.push_back(di+D*dt*beta/(dx*alpha));
-    }
+      col.push_back(i),row.push_back(i),val.push_back(di+D*dt*beta/(dx*alpha));}
 
     else if((i+1)%N==1 && me==1){//domaine 2 //modification de la premiere ligne
-      col.push_back(i);
-      row.push_back(i);
-      val.push_back(di+D*dt*beta/(dx*alpha));
-    }
+      col.push_back(i),row.push_back(i),val.push_back(di+D*dt*beta/(dx*alpha));}
 
-
-    else{
-      col.push_back(i);
-      row.push_back(i);
-      val.push_back(di);
-    }
+    else{col.push_back(i),row.push_back(i),val.push_back(di);}
 
     if((i+1)>=N*Ny){} //test de la derniere ligne/colonne
 
     //remplissage des termes de la sur-diagonale et sous-diagonale du bloc diagonal
     else{
-
       col.push_back(i+1);//sur-diag inchangee quelque soit le domaine
       row.push_back(i);
       val.push_back(sdi);
@@ -57,20 +44,17 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       if ((i+1)%N==N-1 && me==0) {//domaine 1
         col.push_back(i);//sous-diag
         row.push_back(i+1);
-        val.push_back(2*sdi);
-      }
+        val.push_back(2*sdi);}
 
       else if (i%N==N-1 && me==1) {// domaine 2
         col.push_back(i);//sous-diag
         row.push_back(i+1);
-        val.push_back(2*sdi);
-      }
+        val.push_back(2*sdi);}
 
       else{
         col.push_back(i); //sous-diagonale
         row.push_back(i+1);
-        val.push_back(sdi);
-      }
+        val.push_back(sdi);}
     }
 
     //remplissage des blocs sur la sur-diagonale et la sous-diagonale par blocs
@@ -80,8 +64,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       val.push_back(ssdi);
       col.push_back(i+Ny); //stockage de la sur-sur-diagonale (symetrie)
       row.push_back(i);
-      val.push_back(ssdi);
-    }
+      val.push_back(ssdi);}
   }
 }
 
@@ -100,7 +83,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     for(int j=0; j<Ny; j++){
       for(int i=0; i<N; i++){
 
-        S[i+j*N]=U[i+j*N] ;
+          S[i+j*N]=U[i+j*N];
 
         if (me==0){ //domaine 1
 
@@ -112,21 +95,19 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
 
           if (i==0) S[i+j*N]+=D*dt*h(0,(j+1)*dy,mode)/(dx*dx);
 
-          else if (i==N-1) S[i+j*N]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
-        }
-        else if (me==1){ //domaine 2
-          // Invariant: Nu+Nv-h_part = Nx
+          else if (i==N-1)S[i+j*N]+=gamma*(V[Ny*2+j]-V[j])+eta*V[Ny+j];}
 
-          S[i+j*N]=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        else if (me==1){ //domaine 2
+
+          S[i+j*N]+=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
           if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
 
           else if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
 
-          if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
+          if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j])+eta*V[Ny+j];
 
-          else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);
-        }
+          else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);}
       }
     }
   }
