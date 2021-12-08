@@ -92,7 +92,7 @@ int main(int argc, char** argv){
     double t = k*dt; //temps de l'experience
 
     //Initialisation des stencils
-    for (int i = 0; i < U0.size(); i++) {U0[i]=1.,V0[i]=1.;}
+    for (int i = 0; i < U0.size(); i++) U0[i]=1.,V0[i]=1.;
 
     //Boucle de Schwarz
     while ((iteschwz <= maxschwz)||(error >= errschwz)){
@@ -123,14 +123,6 @@ int main(int argc, char** argv){
     }
 
     //ecriture dans les  fichiers
-    /*
-    std::ostringstream oss;
-    oss<<prefixe<<k<<".txt";
-    std::ofstream NewFichier(oss.str().c_str(), std::ios::out | std::ios::trunc);
-
-    for (int i = 0; i < Nx; i++) {
-    for (int j = 0; j < Ny; j++) {
-    NewFichier<< x_tab[i] <<" "<<  y_tab[j] << " " << U[i+j*Nx] << endl;}}*/
 
   }
   gettimeofday(&t2, NULL);

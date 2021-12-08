@@ -10,6 +10,14 @@
 
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
+  // Input ::
+  // Nx et Ny : nombre de points de discretisation selon x et selon y
+  // Nu et Nv : nombre de points de discretisation selon x dans les sous domaines (1 et 2)
+  // me : indice du sous-domaine (1 ou 2)
+  //
+  // Output ::
+  // row et col : indices des lignes et des colonnes des termes non-nuls de la matrice
+  // val : valeurs des termes non-nuls de la matrice
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
@@ -37,7 +45,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       row.push_back(i);
       val.push_back(di+D*dt*beta/(dx*alpha));
     }
-
 
     else{
       col.push_back(i);
@@ -85,48 +92,56 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
   }
 }
 
+// ---------------------------------------------------------
+//fonction qui remplit le vecteur second membre selon le domaine ou l'on se trouve
 
-  // ---------------------------------------------------------
-  //fonction qui remplit le vecteur second membre du probleme
+void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
-  void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
+  // Input ::
+  // U : vecteur des solutions sur le sous-domaine (1 ou 2), de taille Ny*N
+  // V : stencil, vecteur de taille 3*Ny
+  // Nx et Ny : nombre de points de discretisation selon x et selon y
+  // N : nombre de points de discretisation selon x dans le sous domaine (1 ou 2)
+  // mode : choix des fonctions second membre et de bords
+  // me : indice du sous-domaine (1 ou 2)
+  //
+  // Output ::
+  // S : vecteur second membre, de taille Ny*N
 
-    // Fonction qui remplit le second membre selon le domaine ou l'on se trouve
+  double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
+  double gamma=D*dt/(dx*dx);
+  double eta=2*D*dt*beta/(dx*alpha);
 
-    double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
-    double gamma=D*dt/(dx*dx);
-    double eta=2*D*dt*beta/(dx*alpha);
+  for(int j=0; j<Ny; j++){
+    for(int i=0; i<N; i++){
 
-    for(int j=0; j<Ny; j++){
-      for(int i=0; i<N; i++){
+      S[i+j*N]=U[i+j*N];
 
-        S[i+j*N]=U[i+j*N] ;
+      if (me==0){ //domaine 1
 
-        if (me==0){ //domaine 1
+        S[i+j*N]+=dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-          S[i+j*N]+=dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        if (j==0) S[i+j*N]+=D*dt*g((i+1)*dx,0,mode)/(dy*dy);
 
-          if (j==0) S[i+j*N]+=D*dt*g((i+1)*dx,0,mode)/(dy*dy);
+        else if (j==Ny-1) S[i+j*N]+=D*dt*g((i+1)*dx,Ly,mode)/(dy*dy);
 
-          else if (j==Ny-1) S[i+j*N]+=D*dt*g((i+1)*dx,Ly,mode)/(dy*dy);
+        if (i==0) S[i+j*N]+=D*dt*h(0,(j+1)*dy,mode)/(dx*dx);
 
-          if (i==0) S[i+j*N]+=D*dt*h(0,(j+1)*dy,mode)/(dx*dx);
+        else if (i==N-1) S[i+j*N]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
+      }
+      else if (me==1){ //domaine 2
+        // Invariant: Nu+Nv-h_part = Nx
 
-          else if (i==N-1) S[i+j*N]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
-        }
-        else if (me==1){ //domaine 2
-          // Invariant: Nu+Nv-h_part = Nx
+        S[i+j*N]+=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-          S[i+j*N]=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
 
-          if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
+        else if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
 
-          else if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
+        if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
 
-          if (i==0) S[i+j*N]+=gamma*(V[j]-V[Ny*2+j]) + eta*V[Ny+j];
-
-          else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);
-        }
+        else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);
       }
     }
   }
+}
