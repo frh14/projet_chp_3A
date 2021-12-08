@@ -118,6 +118,7 @@ int main(int argc, char** argv){
 
       // Evaluation de l'erreur pour la condition d'arret error
       error = maj_error(U,V,h_part,Ny,Nu);
+      printf("error = %f\n", error );
 
       iteschwz++;
     }

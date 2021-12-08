@@ -101,4 +101,5 @@ void mulSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<dou
   for (int i = 0; i < y.size(); i++) y[i]=0.;
 
   for (int k = 0; k < row.size(); k++) y[row[k]]+=val[k]*x[col[k]];
+
 }
