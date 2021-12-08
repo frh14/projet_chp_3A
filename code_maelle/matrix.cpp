@@ -11,8 +11,7 @@
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int Nu, int Nv, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
   // Input ::
-  // Nx et Ny : nombre de points de discretisation selon x et selon y
-  // Nu et Nv : nombre de points de discretisation selon x dans les sous domaines (1 et 2)
+  // Nu et Nv : nombre de noeuds en x dans les sous domaines (1 et 2)
   // me : indice du sous-domaine (1 ou 2)
   //
   // Output ::
@@ -95,14 +94,12 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
 // ---------------------------------------------------------
 //fonction qui remplit le vecteur second membre selon le domaine ou l'on se trouve
 
-void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
+void secondMembre(std::vector<double> &S,std::vector<double> &U, std::vector<double> &V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
   // Input ::
-  // U : vecteur des solutions sur le sous-domaine (1 ou 2), de taille Ny*N
+  // U : vecteur solution sur le sous-domaine (1 ou 2), de taille Ny*N
   // V : stencil, vecteur de taille 3*Ny
-  // Nx et Ny : nombre de points de discretisation selon x et selon y
-  // N : nombre de points de discretisation selon x dans le sous domaine (1 ou 2)
-  // mode : choix des fonctions second membre et de bords
+  // N : nombre de noeuds en x dans le sous domaine (1 ou 2)
   // me : indice du sous-domaine (1 ou 2)
   //
   // Output ::
@@ -130,7 +127,6 @@ void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<doub
         else if (i==N-1) S[i+j*N]+=gamma*(V[Ny*2+j]-V[j]) + eta*V[Ny+j];
       }
       else if (me==1){ //domaine 2
-        // Invariant: Nu+Nv-h_part = Nx
 
         S[i+j*N]+=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
