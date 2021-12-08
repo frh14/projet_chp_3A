@@ -15,7 +15,7 @@
 
 using namespace std;
 
-//résolution de l'equation de diffusion sur un domaine Omega partitionne avec en deux sous domaine Omega1 et Omega2
+//resolution de l'equation de diffusion sur un domaine Omega partitionne avec en deux sous domaine Omega1 et Omega2
 //conditions aux limites sur les bords Gamma1 et Gamma2 de type non homogene données par des fonctions
 //le domaine est scinde en deux selon ses lignes
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv){
   // Lecture des donnees dans le fichier parametres (parameters.txt)
   ifstream file("parameters.txt");
   int Nx(0), Ny(0);        // Nombre de noeuds en x et en y
-  double Lx(0), Ly(0); // Taille du rectangle
+  double Lx(0), Ly(0); // Taille du domaine rectanguaire Lx*Ly
   double D(0), dt(0); // Coefficient de diffusion et pas de temps
   int mode(0);  // Variable qui permet de choisir quelles fonctions f,g,h sont prises
   int h_part(0); // parametre de recouvrement: nombre de lignes partagees par chaque sous-domaine
@@ -34,12 +34,13 @@ int main(int argc, char** argv){
 
   //------------------------------------------------------------------------------------------------------------------------------------
   //resolution sequentielle du probleme de diffusion
-  //----------------------------------------------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------------------------------------------
 
   struct timeval t1,t2;
   gettimeofday(&t1, NULL);
 
   //construction de nos indices de separation de domaine selon ses lignes
+  // Invariant: Nu+Nv-h_part = Nx
   int Nu(0); //domaine 1
   int Nv(0); //domaine 2
   //test sur la parite de Nx
@@ -103,8 +104,8 @@ int main(int argc, char** argv){
       secondMembre(Sv,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      BICG(rowu,colu,valu,U,Su,e,kmax,Nu,Ny);
-      BICG(rowv,colv,valv,V,Sv,e,kmax,Nv,Ny);
+      BICGStab(rowu,colu,valu,U,Su,e,kmax,Nu,Ny);
+      BICGStab(rowv,colv,valv,V,Sv,e,kmax,Nv,Ny);
 
       //mise a jour des stencils
       for (int j = 0; j < Ny; j++){
@@ -132,9 +133,9 @@ int main(int argc, char** argv){
   printf("Nx=%d, Ny=%d, Lx=%f , Ly=%f, D=%f, dt=%f , h_part=%d, alpha=%f, beta=%f \n",Nx,Ny,Lx,Ly,D,dt,h_part,alpha,beta);
   printf("temps ecoule =%lu \n",t2.tv_usec - t1.tv_usec);
 
-  //-----------------------------------------------------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------------
   //fin de la resolution sequentielle
-  //------------------------------------
+  //-------------------------------------------------------------------------------------------------------------------------------------
 
   return 0;
 
