@@ -157,14 +157,14 @@ int main(int argc, char** argv){
 
       //mise a jour des stencils
 
-      for (int j = 0; j < Ny ; i++) {
+      for (int j = 0; j < Ny ; j++) {
 
         U0[j] = V[Nv*j];
         U0[Ny+j] = V[1+Nv*j];
         U0[2*Ny+j] = V[2+Nv*j];
-        V0[j] = U[Nu-1+Nu*j];
-        V0[Ny+j] =
-        V0[2*Ny+j] = ;
+        V0[j] = U[Nu-3+Nu*j];
+        V0[Ny+j] = U[Nu -2  + Nu*j]
+        V0[2*Ny+j] = U[Nu-1 + Nu*j]; //dernière colonne de U = Nu-1 ?
 
       }
 
