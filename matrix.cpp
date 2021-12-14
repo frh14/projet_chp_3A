@@ -1,9 +1,10 @@
 #include <vector>
-#include<cstdio>
-#include<cstdlib>
-#include"math.h"
-#include "fonctions.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <math.h>
+
 #include "matrix.hpp"
+#include "fonctions.hpp"
 
 //------------------------------------------------------------------------------------------------------------------------
 //fonction qui remplit la matrice de diffusion sur un sous domaine
