@@ -163,7 +163,7 @@ int main(int argc, char** argv){
         U0[Ny+j] = V[1+Nv*j];
         U0[2*Ny+j] = V[2+Nv*j];
         V0[j] = U[Nu-3+Nu*j];
-        V0[Ny+j] = U[Nu -2  + Nu*j]
+        V0[Ny+j] = U[Nu -2  + Nu*j];
         V0[2*Ny+j] = U[Nu-1 + Nu*j]; //dernière colonne de U = Nu-1 ?
 
       }
