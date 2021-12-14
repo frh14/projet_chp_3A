@@ -6,7 +6,7 @@
 #include "fonctions.hpp"
 #include "solveur.hpp"
 
-//module qui contient les fonctions utiles à la resolution du probleme
+//module qui contient les fonctions utiles a la resolution du probleme
 //notamment les fonctions de conditions de limite
 
 //------------------------------------------------------------------------------
