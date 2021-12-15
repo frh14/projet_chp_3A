@@ -73,7 +73,7 @@
 
 double norm2(std::vector<double> x){
   double norm=0.;
-  for (int i = 0; i < x.size(); i++) norm+=x[i]*x[i];
+  for (int i = 0; i < (int)x.size(); i++) norm+=x[i]*x[i];
   norm=sqrt(norm);
   return norm;
 }
@@ -84,7 +84,7 @@ double norm2(std::vector<double> x){
 
 double ps(std::vector<double> x,std::vector<double> y){
   double ps=0.;
-  for (int i = 0; i < x.size(); i++) ps+=x[i]*y[i];
+  for (int i = 0; i < (int)x.size(); i++) ps+=x[i]*y[i];
   return ps;
 }
 
@@ -98,8 +98,8 @@ double ps(std::vector<double> x,std::vector<double> y){
 
 void mulSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<double> val, std::vector<double> &y, std::vector<double> x) {
 
-  for (int i = 0; i < y.size(); i++) y[i]=0.;
+  for (int i = 0; i < (int)y.size(); i++) y[i]=0.;
 
-  for (int k = 0; k < row.size(); k++) y[row[k]]+=val[k]*x[col[k]];
+  for (int k = 0; k < (int)row.size(); k++) y[row[k]]+=val[k]*x[col[k]];
 
 }
