@@ -157,7 +157,7 @@ int main(int argc, char** argv){
 
       //mise a jour des stencils
 
-      for (int j = 0; j < Ny ; j++) {
+  /*    for (int j = 0; j < Ny ; j++) {
 
         U0[j] = V[Nv*j];
         U0[Ny+j] = V[1+Nv*j];
@@ -167,19 +167,22 @@ int main(int argc, char** argv){
         V0[2*Ny+j] = U[Nu-1 + Nu*j]; //dernière colonne de U = Nu-1 ?
 
       }
-
-
-      for (int j = 0; j < Ny; j++){
-        U0[j] = V[Ny*(h_part-1)+j];
-        U0[Ny+j] = V[Ny*(h_part)+j];
-        U0[2*Ny+j] = V[Ny*(h_part+1)+j];
-        V0[j] = U[Ny*(Nu-h_part-1)+j];
-        V0[Ny+j] = U[Ny*(Nu-h_part)+j];
-        V0[2*Ny+j] = U[Ny*(Nu-h_part+1)+j];}
+*/
 
       // Evaluation de l'erreur pour la condition d'arret error
-      error = maj_error(U,V,h_part,Ny,Nu);
+      error = maj_error(U,U0,h_part,Ny,Nu);
       printf("erreur de schwartz=%f \n",error);
+
+      for (int i = 0 ; i<Ny ; i++ ){
+        U0[i*3] =V[h_part-2 +i*Nv ] ;
+        U0[i*3+1]= V[h_part-1 +i*Nv ] ;
+        U0[i*3+2] =V[h_part +i*Nv ] ;
+        V0[i*3]= U[Nu-1-h_part-1 + i*Nu] ;
+        V0[i*3+1]= U[Nu-1-h_part + i*Nu] ;
+        V0[i*3+2]= U[Nu-1-h_part+1 + i*Nu] ;
+      }
+
+
 
       iteschwz++;
 

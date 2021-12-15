@@ -32,15 +32,12 @@ double h(double x,double y,int mode){
 
 
 
-double maj_error(std::vector<double> U , std::vector<double> V , int h , int Ny , int N)
+double maj_error(std::vector<double> U , std::vector<double> U0 , int h , int Ny , int N)
 {
   double error , error_max(0) ;
-  std::vector<double> Vect_loc(Ny) ;
 
-   for (int i=0 ; i< h ; i++ ){
      for (int j=0 ; j<Ny ; j++){
-       Vect_loc[j] = U[(N-h+i)*Ny+j] - V[(i*Ny)+j] ;
-       error = norm2(Vect_loc) ;
-       if (error>error_max) error_max=error ;}}
+       error =abs( U[N-1-h + j*N] - U0[j*3+1] )  ;
+       if (error>error_max) error_max=error ;}
    return error_max ;
 }
