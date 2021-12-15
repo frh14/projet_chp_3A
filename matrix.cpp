@@ -79,6 +79,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
     double gamma=D*dt/(dx*dx);
     double eta=2*D*dt*beta/(dx*alpha);
+    std::vector<double> S1(Nx*Ny) ;
 
     for(int j=0; j<Ny; j++){
       for(int i=0; i<N; i++){
@@ -110,4 +111,12 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           else if (i==N-1) S[i+j*N]+=D*dt*h(Lx,(j+1)*dy,mode)/(dx*dx);}
       }
     }
+/*
+    for (int i = 0; i< Nx ; i++){
+      for (int j= 0 ; j< Ny ; j++ ){
+        S1[i*Ny+j] =S[i+j*Ny] ;
+      }
+    }
+    printf("ok\n" );
+    for (int i=0 ; i< Ny*Nx ; i++) S[i] = S1[i] ;*/
   }
