@@ -6,6 +6,66 @@
 #include "solveur.hpp"
 #include "charge.hpp"
 
+std::vector<double> BICGStabTest(std::vector<int> row,std::vector<int> col,std::vector<double> val,std::vector<double> &F,double e,int kmax,int Nx,int Ny){
+
+  std::vector<double> X(Nx*Ny,0),X0(Nx*Ny,0);
+  
+  //initialisation du reste
+  std::vector<double> r(Nx*Ny,0),r0(Nx*Ny,0),p(Nx*Ny,0),p0(Nx*Ny,0);
+  std::vector<int> rowT,colT;
+  std::vector<double> valT;
+
+  mulSparseMatrix(row,col,val,r,X);
+  transpSparseMatrix(row,col,val,rowT,colT,valT);
+  mulSparseMatrix(rowT,colT,valT,r0,X);
+
+  for (int j=0; j<Ny; j++){
+    for (int i=0; i<Nx; i++){
+      r[j*Nx+i]=F[j*Nx+i]-r[j*Nx+i];
+      r0[j*Nx+i]=F[j*Nx+i]-r0[j*Nx+i];
+    }
+  }
+  p=r;
+  p0=r0;
+
+  int k=0;
+  std::vector<double> mu(Nx*Ny,0),nu(Nx*Ny,0);
+  double alpha,beta,gamma;
+
+  //while (k<kmax && ps(r,r)>e*e){
+  while (k<20){
+
+    gamma = ps(r,r0);
+    
+    mulSparseMatrix(row,col,val,mu,p); // mu=Ap
+    mulSparseMatrix(row,col,val,mu,p); // nu=A* p0
+
+    alpha = gamma/ps(mu,p0);
+    
+    for (int j=0; j<Ny; j++){
+      for (int i=0; i<Nx; i++){
+	X[j*Nx+i] += alpha*p[k];
+	X0[j*Nx+i]+= alpha*p0[k];
+	r[j*Nx+i] -= alpha*mu[j*Nx+i];
+	r0[j*Nx+i] -= alpha*nu[j*Nx+i];
+      }
+    }
+
+    beta = ps(r,r0)/gamma;
+
+    for (int j=0; j<Ny; j++){
+      for (int i=0; i<Nx; i++){
+	p[j*Nx+i] = r[j*Nx+i] + beta*p[j*Nx+i];
+	p0[j*Nx+i] = r0[j*Nx+i] + beta*p0[j*Nx+i];
+      }
+    }
+    
+    k++;
+  }
+  
+  return X;
+}
+
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 //fonction qui resout par la methode du gradient bi-conjugue stabilise un systeme lineaire Ax=b
@@ -109,4 +169,15 @@ double ps(std::vector<double> x,std::vector<double> y){
 void mulSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<double> val, std::vector<double> &y, std::vector<double> x){
   for (int i = 0; i < y.size(); i++) y[i]=0.;
   for (int k = 0; k < row.size(); k++) y[row[k]]+=val[k]*x[col[k]];
+}
+
+//----------------------------------------------------------------------
+//transpose matrice
+
+void transpSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<double> val,std::vector<int> &rowT, std::vector<int> &colT, std::vector<double> &valT ){
+  for (int k = 0; k < row.size(); k++){
+    colT.push_back(row[k]);
+    rowT.push_back(col[k]);
+    valT.push_back(val[k]);
+  }  
 }

@@ -93,8 +93,8 @@ int main(int argc, char** argv){
       secondMembre(Sv,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      BICGStab(rowu,colu,valu,U,Su,e,kmax,Nu,Ny);
-      BICGStab(rowv,colv,valv,V,Sv,e,kmax,Nv,Ny);
+      U=BICGStabTest(rowu,colu,valu,Su,e,kmax,Nu,Ny);
+      V=BICGStabTest(rowv,colv,valv,Sv,e,kmax,Nv,Ny);
 
       //mise a jour des stencils
 
