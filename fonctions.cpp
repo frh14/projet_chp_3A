@@ -53,7 +53,7 @@ double maj_error(std::vector<double> U, std::vector<double> V, int h, int Ny, in
 
   for (int j=0; j<Ny; j++){
     for (int i=0; i<h; i++ ){
-      error = U[j*Nu+(Nu-h-1)+i] - V[j*Nv+i];
+      error = abs(U[j*Nu+(Nu-h-1)+i] - V[j*Nv+i]);
       if (error>error_max) error_max=error;
     }
   }

@@ -9,7 +9,7 @@
 std::vector<double> BICGStabTest(std::vector<int> row,std::vector<int> col,std::vector<double> val,std::vector<double> &F,double e,int kmax,int Nx,int Ny){
 
   std::vector<double> X(Nx*Ny,0),X0(Nx*Ny,0);
-  
+
   //initialisation du reste
   std::vector<double> r(Nx*Ny,0),r0(Nx*Ny,0),p(Nx*Ny,0),p0(Nx*Ny,0);
   std::vector<int> rowT,colT;
@@ -36,12 +36,12 @@ std::vector<double> BICGStabTest(std::vector<int> row,std::vector<int> col,std::
   while (k<20){
 
     gamma = ps(r,r0);
-    
+
     mulSparseMatrix(row,col,val,mu,p); // mu=Ap
     mulSparseMatrix(row,col,val,mu,p); // nu=A* p0
 
     alpha = gamma/ps(mu,p0);
-    
+
     for (int j=0; j<Ny; j++){
       for (int i=0; i<Nx; i++){
 	X[j*Nx+i] += alpha*p[k];
@@ -59,10 +59,10 @@ std::vector<double> BICGStabTest(std::vector<int> row,std::vector<int> col,std::
 	p0[j*Nx+i] = r0[j*Nx+i] + beta*p0[j*Nx+i];
       }
     }
-    
+
     k++;
   }
-  
+
   return X;
 }
 
@@ -132,6 +132,7 @@ void BICGStab(std::vector<int> row,std::vector<int> col,std::vector<double> val,
 
     k=k+1;
     norm=norm2(r);
+    printf("norme r %f \n",norm );
     rho=rhoplus;
   }
 }
@@ -179,5 +180,5 @@ void transpSparseMatrix(std::vector<int> row, std::vector<int> col, std::vector<
     colT.push_back(row[k]);
     rowT.push_back(col[k]);
     valT.push_back(val[k]);
-  }  
+  }
 }

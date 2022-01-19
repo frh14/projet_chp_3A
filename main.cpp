@@ -66,8 +66,8 @@ int main(int argc, char** argv){
   Matrix(rowv,colv,valv,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
   int Nt=1; // nombre d'iterations en temps
-  double e=0.00000000001; //tolerance pour le GC
-  int kmax=Nx*Ny; //iteration max du BICGStab
+  double e=0.0000001; //tolerance pour le GC
+  int kmax=10*Nx*Ny; //iteration max du BICGStab
 
   //Parametres d'arret pour Schwarz
   double errschwz = 0.000000001;
@@ -93,8 +93,11 @@ int main(int argc, char** argv){
       secondMembre(Sv,V,U0,Nx,Ny,Nv,dt,t,Lx,Ly,D,mode,alpha,beta,1);
 
       //resolution du systeme lineaire sur chaque sous-domaine
-      U=BICGStabTest(rowu,colu,valu,Su,e,kmax,Nu,Ny);
-      V=BICGStabTest(rowv,colv,valv,Sv,e,kmax,Nv,Ny);
+      //U=BICGStabTest(rowu,colu,valu,Su,e,kmax,Nu,Ny);
+      //V=BICGStabTest(rowv,colv,valv,Sv,e,kmax,Nv,Ny);
+
+      BICGStab(rowu , colu , valu , U , Su , e , kmax , Nu , Ny ) ;
+      BICGStab(rowv , colv , valv , V , Sv , e , kmax , Nv , Ny ) ;
 
       //mise a jour des stencils
 
