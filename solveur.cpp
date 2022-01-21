@@ -132,7 +132,6 @@ void BICGStab(std::vector<int> row,std::vector<int> col,std::vector<double> val,
 
     k=k+1;
     norm=norm2(r);
-    printf("norme r %f \n",norm );
     rho=rhoplus;
   }
 }

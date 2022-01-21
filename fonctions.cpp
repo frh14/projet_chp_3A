@@ -48,12 +48,12 @@ double h(double x,double y,int mode){
 // -----------------------------------------------------------------------------
 
 double maj_error(std::vector<double> U, std::vector<double> V, int h, int Ny, int Nu, int Nv){
-  double error , error_max(0) ;
-  std::vector<double> Vect_loc(Ny) ;
+  double error , error_max(0.) ;
 
   for (int j=0; j<Ny; j++){
     for (int i=0; i<h; i++ ){
-      error = abs(U[j*Nu+(Nu-h-1)+i] - V[j*Nv+i]);
+      //printf("U[%d]=%f et V[%d]=%f \n",j*Nu+Nu-h+i,U[j*Nu+Nu-h+i],Nv*j+i,V[Nv*j+i]);
+      error = abs(U[j*Nu+Nu-h+i]-V[j*Nv+i]);
       if (error>error_max) error_max=error;
     }
   }
