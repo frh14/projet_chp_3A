@@ -20,7 +20,7 @@ using namespace std;
 int main(int argc, char** argv){
 
   // Lecture des donnees dans le fichier parametres (parameters.txt)
-  ifstream file("parameters.txt");
+  ifstream file("parameters.dat");
   int Nx(0), Ny(0);        // Nombre de noeuds en x et en y
   double Lx(0), Ly(0); // Taille du rectangle
   double D(0), dt(0); // Coefficient de diffusion et pas de temps
