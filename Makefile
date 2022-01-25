@@ -21,7 +21,7 @@ endif
 main_PROG = exec
 
 # Fichiers sources a compiler
-SRC = charge.cpp solveur.cpp matrix.cpp fonctions.cpp
+SRC = charge.cpp update.cpp solveur.cpp matrix.cpp fonctions.cpp
 main_SRC = $(SRC) main.cpp
 main_OBJECTS = $(main_SRC:.cpp=.o)
 
@@ -34,7 +34,7 @@ all: $(main_PROG)
 # Supprime l'executable, les fichiers binaires (.o)
 # et les fichiers temporaires de sauvegarde (~)
 clean :
-	rm -f $(main_OBJECTS) $(main_PROG)
+	rm -f $(main_OBJECTS) $(main_PROG) *~
 
 # Regle commune pour compiler chaque .cpp en .o
 # $@ signifie "la destination" (a gauche de la regle : le fichier.o)
