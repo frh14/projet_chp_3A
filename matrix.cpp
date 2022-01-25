@@ -3,14 +3,13 @@
 #include <cstdlib>
 #include <math.h>
 
-#include "matrix.hpp"
 #include "fonctions.hpp"
+#include "matrix.hpp"
 
 //------------------------------------------------------------------------------
 //fonction qui remplit la matrice de diffusion sur un sous domaine
 
 void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int N, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
-
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
@@ -87,7 +86,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
   }
 
 }
-
 
 // -----------------------------------------------------------------------------
 //fonction qui remplit le vecteur second membre du probleme selon le domaine ou l'on se trouve

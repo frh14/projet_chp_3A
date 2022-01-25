@@ -21,12 +21,12 @@ int main(int argc, char** argv){
 
   // Lecture des donnees dans le fichier parametres (parameters.txt)
   ifstream file("parameters.dat");
-  int Nx(0), Ny(0);        // Nombre de noeuds en x et en y
-  double Lx(0), Ly(0); // Taille du rectangle
-  double D(0), dt(0); // Coefficient de diffusion et pas de temps
-  int mode(0);  // Variable qui permet de choisir quelles fonctions f,g,h sont prises
-  int h_part(0); // parametre de recouvrement: nombre de lignes partagees par chaque sous-domaine
-  double alpha(1), beta(1); // Coefficients de la condition d'interface (Neumann-Dirichlet)
+  int Nx(6), Ny(6);                // Nombre de noeuds en x et en y
+  double Lx(1), Ly(1);             // Taille du rectangle
+  double D(1), dt(0.01);              // Coefficient de diffusion et pas de temps
+  int mode(1);                     // Mode pour le choix des fonctions f,g,h prises
+  int h_part(2);                   // Parametre de recouvrement: nombre de lignes partagees par chaque sous-domaine
+  double alpha(1), beta(1);        // Coefficients de la condition d'interface (Neumann-Dirichlet)
   file >> Nx >> Ny >> Lx >> Ly >> D >> dt >> mode >> h_part >> alpha >> beta ;
   file.close();
 
@@ -35,12 +35,16 @@ int main(int argc, char** argv){
 //----------------------------------------------------------------------
 
   int Nt=1; // nombre d'iterations en temps
-  double e=1e-10; //tolerance pour le GC
-  int kmax=Nx*Ny; //iteration max du BICGStab
+
+  if (argc>1) h_part = atoi(argv[1]);
+  if (argc>2) Nt = atoi(argv[2]);
+  
+  double e=1e-10; //tolerance pour le CG
+  int kmax=10*Nx*Ny; //iteration max du BICGStab
 
   //Parametres d'arret pour Schwarz
-  double errschwz = 1e-8;
-  int maxschwz = 100;
+  double errschwz=1e-8;
+  int maxschwz=10*Nx*Ny;
   
   //construction de nos indices de separation de domaine selon ses lignes
   int Nu(0); //domaine 1
