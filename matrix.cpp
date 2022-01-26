@@ -21,7 +21,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
   if (alpha != 0) gamma = di+2*D*dt*beta/(dx*alpha);
   else gamma = 1./(dx*dx);
 
-  printf("sdi=%f , ssdi=%f , di=%f , gamma=%f \n",sdi,ssdi,di,gamma);
+  //printf("sdi=%f , ssdi=%f , di=%f , gamma=%f \n",sdi,ssdi,di,gamma);
 
   for(int i=0; i<(N*Ny); i++){
     
@@ -33,12 +33,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           col.push_back(i); //stockage de la sous-diagonale premiere ligne
           row.push_back(i+1);
           val.push_back(2*sdi);
-	  
-	  if (alpha==0 && (i+1)%N==0){
-	    col.pop_back();
-	    row.pop_back();
-	    val.pop_back();
-	  }
         }
 
         else if((i+1)%N==N){}
@@ -49,9 +43,38 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           val.push_back(sdi);
         }
 
+	if (alpha==0){ // Suppression du terme ajoute si:
+	  if(me==0 && (i+1)%N==(N-1)){ // domaine 1 derniere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else if(me==1 && (i+1)%N==0){ // domaine 2 premiere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else{}
+	}
+
         col.push_back(i+1); //stockage de la sur-diagonale (symetrie)
         row.push_back(i);
         val.push_back(sdi);
+
+	if (alpha==0){ // Suppression du terme ajoute si:
+	  if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else if(me==1 && i%N==0){ // domaine 2 premiere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else{}
+	}
+	
       }
     }
 
@@ -62,12 +85,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           col.push_back(i+1); //stockage de la sur-diagonale derniere ligne
           row.push_back(i);
           val.push_back(2*sdi);
-	  
-	  if (alpha==0 && i%(N-1)==0){
-	    col.pop_back();
-	    row.pop_back();
-	    val.pop_back();
-	  }
         }
 
         else{
@@ -76,9 +93,38 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           val.push_back(sdi);
         }
 
+	if (alpha==0){ // Supression du terme ajoute si:
+	  if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else if(me==1 && i%N==0){ // domaine 2 premiere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else{}
+	}
+
         col.push_back(i); //stockage de la sous-diagonale
         row.push_back(i+1);
         val.push_back(sdi);
+
+	if (alpha==0){ // Supression du terme ajoute si:
+	  if(me==0 && (i+1)%N==(N-1)){ // domaine 1 derniere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else if(me==1 && (i+1)%N==0){ // domaine 2 premiere ligne
+	    col.pop_back();
+	    row.pop_back();
+	    val.pop_back();
+	  }
+	  else{}
+	}
+	
       }
     }
 
@@ -86,34 +132,44 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       col.push_back(i); //stockage de la sous-sous-diagonale
       row.push_back(i+N);
       val.push_back(ssdi);
+
+      if (alpha==0){ // Suppression du terme ajoute si:
+	if(me==0 && (i+N)%N==(N-1)){ // domaine 1 derniere ligne
+	  col.pop_back();
+	  row.pop_back();
+	  val.pop_back();
+	}
+	else if(me==1 && (i+N)%N==0){ // domaine2 premiere ligne
+	  col.pop_back();
+	  row.pop_back();
+	  val.pop_back();
+	}
+	else{}
+      }
+      
       col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
       row.push_back(i);
       val.push_back(ssdi);
-      
-      if (alpha==0){
-	if(me==0 && (i+N)%(N-1)==0){
-	  col.pop_back();
-	  row.pop_back();
-	  val.pop_back();
-	  col.pop_back();
-	  row.pop_back();
-	  val.pop_back();
-	}
-	if(me==1 && i%N==0){
-	  col.pop_back();
-	  row.pop_back();
-	  val.pop_back();
+
+      if (alpha==0){ // Suppression du terme ajoute si:
+	if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
 	  col.pop_back();
 	  row.pop_back();
 	  val.pop_back();
 	}
+	else if(me==1 && i%N==0){ // domaine 2 premiere ligne
+	  col.pop_back();
+	  row.pop_back();
+	  val.pop_back();
+	}
+	else{}
       }
     }
     
-    if ((i+1)%N==0 && me==0) {//domaine 1 //modification de la derniere ligne
+    if ((i+1)%N==0 && me==0) { //domaine 1 : modification de la derniere ligne
       col.push_back(i),row.push_back(i),val.push_back(gamma);}
 
-    else if((i+1)%N==1 && me==1){//domaine 2 //modification de la premiere ligne
+    else if((i+1)%N==1 && me==1){ //domaine 2 : modification de la premiere ligne
       col.push_back(i),row.push_back(i),val.push_back(gamma);}
 
     else{col.push_back(i),row.push_back(i),val.push_back(di);}
@@ -128,8 +184,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
   void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
     double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
-    double delta=D*dt/(dx*dx);
-    double eta;
+    double delta=D*dt/(dx*dx),eta(1);
 
     if (alpha != 0) eta=2*D*dt*beta/(dx*alpha);
     else eta=delta;
@@ -137,7 +192,7 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
     for(int j=0; j<Ny; j++){
       for(int i=0; i<N; i++){
 
-          S[i+j*N]=U[i+j*N];
+	S[i+j*N]=U[i+j*N];
 
         if (me==0){ //domaine 1
 
