@@ -1,9 +1,6 @@
 # Compilateur
-CC = g++
+CXX = mpicxx
 
-# Options communes de compilation
-COMMON_FLAGS = -Wall -std=c++11
-CXXFLAGS = $(COMMON_FLAGS)
 # Pour compiler en mode debug, lancez:
 # make DEBUG=1
 #####
@@ -11,10 +8,10 @@ CXXFLAGS = $(COMMON_FLAGS)
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
 	# Options en mode debug - La variable est DEBUG est definie comme vraie
-	CXXFLAGS += -g -DDEBUG
+	CXXFLAGS = -g -Wall -DDEBUG
 else
 	# Options en mode optimise - La variable DEBUG est definie comme fausse
-	CXXFLAGS += -O2 -DNDEBUG
+	CXXFLAGS = -O2 -DNDEBUG
 endif
 
 # Nom de l'executable
@@ -27,20 +24,21 @@ main_OBJECTS = $(main_SRC:.cpp=.o)
 
 # La commande complete : rassemble tous les .o pour l'edition de liens
 $(main_PROG): message $(main_OBJECTS)
-	$(CC)  $(CXXFLAGS) $(main_OBJECTS) -o $(main_PROG)
+	$(CXX)  $(CXXFLAGS) $(main_OBJECTS) -o $(main_PROG)
 
 all: $(main_PROG)
 
 # Supprime l'executable, les fichiers binaires (.o)
-# et les fichiers temporaires de sauvegarde (~)
+# les fichiers temporaires de sauvegarde (~),
+# et les fichiers textes (.txt)
 clean :
-	rm -f $(main_OBJECTS) $(main_PROG) *~
+	rm -f $(main_OBJECTS) $(main_PROG) *~ *.txt
 
 # Regle commune pour compiler chaque .cpp en .o
 # $@ signifie "la destination" (a gauche de la regle : le fichier.o)
 # $< signifie "la source" (a droite de la regle : le fichier.cpp)
 %.o: %.cpp %.h
-	$(CC) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 .PHONY: message
 message:

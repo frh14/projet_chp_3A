@@ -3,9 +3,10 @@
 
 ------------------------------
 * 'main.cpp' : programme pour la resolution de l'equation de diffusion par decompostion de domaine
-	* pour compiler, lancer 'make all'
+	* pour compiler, lancer 'make'
 	* pour compiler en mode debug, lancer 'make DEBUG=1'
-	* pour executer, lancer './exec'
+	* pour executer en sequentiel, lancer './exec 1'
+	* pour executer en parallele, lancer 'mpiexec -n X ./exec 0' avec X le nombre de procs
 * 'parameters.dat' contient les informations pour le systeme et la resolution, dans l'ordre suivant:
 (valeurs par defaut)
 	* Nx (6), Ny (6) : nombre de noeuds du maillage en x et en y
