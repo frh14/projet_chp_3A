@@ -32,6 +32,17 @@ void Update(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,int
   Matrix(rowu,colu,valu,Nx,Ny,Nu,Lx,Ly,D,dt,alpha,beta,0);
   //domaine 2
   Matrix(rowv,colv,valv,Nx,Ny,Nv,Lx,Ly,D,dt,alpha,beta,1);
+
+  /*
+  for (int k=0;k<rowu.size();k++){
+    if(rowu[k]%Nu==Nu-1) printf("col[%d], row[%d]  val[%f]\n",colu[k],rowu[k],valu[k]);
+  }
+  printf("\n");
+  for (int k=0;k<rowv.size();k++){
+    if(rowv[k]%Nv==0) printf("col[%d], row[%d]  val[%f]\n",colv[k],rowv[k],valv[k]);
+  }
+  printf("\n");
+  */
   
   //schema en temps
   for (int k = 0; k < Nt; k++){
@@ -66,9 +77,10 @@ void Update(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,int
       
       // Evaluation de l'erreur pour la condition d'arret error
       error = maj_error(U,V,h_part,Ny,Nu,Nv);
-      printf("ite %d   erreur de schwarz=%f \n",iteschwz,error);
+      //printf("ite %d   erreur de schwarz=%f \n",iteschwz,error);
       iteschwz++;
     }
+    if (iteschwz>=maxschwz) printf("Schwarz n'a pas convergé ! Erreur Schwarz : %f\n",error);
 
     //ecriture dans les  fichiers
     Write(U,V,Nx,Ny,Nu,Nv,Lx,Ly,h_part,k);
