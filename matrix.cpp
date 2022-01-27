@@ -30,9 +30,12 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       else{
 
         if ((i+1)%N==N-1) {
-          col.push_back(i); //stockage de la sous-diagonale premiere ligne
-          row.push_back(i+1);
-          val.push_back(2*sdi);
+          if (alpha==0){}
+          else{
+            col.push_back(i); //stockage de la sous-diagonale premiere ligne
+            row.push_back(i+1);
+            val.push_back(2*sdi);
+          }
         }
 
         else if((i+1)%N==N){}
@@ -43,38 +46,25 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           val.push_back(sdi);
         }
 
-        if (alpha==0){ // Suppression du terme ajoute si:
-          if(me==0 && (i+1)%N==(N-1)){ // domaine 1 derniere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else if(me==1 && (i+1)%N==0){ // domaine 2 premiere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else{}
-        }
-
         col.push_back(i+1); //stockage de la sur-diagonale (symetrie)
         row.push_back(i);
         val.push_back(sdi);
 
-        if (alpha==0){ // Suppression du terme ajoute si:
-          if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else if(me==1 && i%N==0){ // domaine 2 premiere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else{}
-        }
+      }
 
+      if(i+N<N*Ny){
+        if (alpha==0 && (i+N)%N==(N-1)){}
+        else{
+          col.push_back(i); //stockage de la sous-sous-diagonale
+          row.push_back(i+N);
+          val.push_back(ssdi);
+        }
+        if (alpha==0 && i%N==(N-1)){}
+        else{
+          col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
+          row.push_back(i);
+          val.push_back(ssdi);
+        }
       }
     }
 
@@ -82,9 +72,12 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
       if((i+1)%N==0){}
       else{
         if (i%N==0) {
-          col.push_back(i+1); //stockage de la sur-diagonale derniere ligne
-          row.push_back(i);
-          val.push_back(2*sdi);
+          if (alpha==0){}
+          else{
+            col.push_back(i+1); //stockage de la sur-diagonale derniere ligne
+            row.push_back(i);
+            val.push_back(2*sdi);
+          }
         }
 
         else{
@@ -93,91 +86,37 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
           val.push_back(sdi);
         }
 
-        if (alpha==0){ // Supression du terme ajoute si:
-          if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else if(me==1 && i%N==0){ // domaine 2 premiere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else{}
-        }
-
         col.push_back(i); //stockage de la sous-diagonale
         row.push_back(i+1);
         val.push_back(sdi);
 
-        if (alpha==0){ // Supression du terme ajoute si:
-          if(me==0 && (i+1)%N==(N-1)){ // domaine 1 derniere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else if(me==1 && (i+1)%N==0){ // domaine 2 premiere ligne
-            col.pop_back();
-            row.pop_back();
-            val.pop_back();
-          }
-          else{}
-        }
-
-      }
-    }
-
-    if(i+N<N*Ny){
-      col.push_back(i); //stockage de la sous-sous-diagonale
-      row.push_back(i+N);
-      val.push_back(ssdi);
-
-      if (alpha==0){ // Suppression du terme ajoute si:
-        if(me==0 && (i+N)%N==(N-1)){ // domaine 1 derniere ligne
-          col.pop_back();
-          row.pop_back();
-          val.pop_back();
-        }
-        else if(me==1 && (i+N)%N==0){ // domaine2 premiere ligne
-          col.pop_back();
-          row.pop_back();
-          val.pop_back();
-        }
-        else{}
       }
 
-      col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
-      row.push_back(i);
-      val.push_back(ssdi);
-
-      if (alpha==0){ // Suppression du terme ajoute si:
-        if(me==0 && i%N==(N-1)){ // domaine 1 derniere ligne
-          col.pop_back();
-          row.pop_back();
-          val.pop_back();
+      if(i+N<N*Ny){
+        if (alpha==0 && (i+N)%N==0){}
+        else{
+          col.push_back(i); //stockage de la sous-sous-diagonale
+          row.push_back(i+N);
+          val.push_back(ssdi);
         }
-        else if(me==1 && i%N==0){ // domaine 2 premiere ligne
-          col.pop_back();
-          row.pop_back();
-          val.pop_back();
+        if (alpha==0 && i%N==0){}
+        else{
+          col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
+          row.push_back(i);
+          val.push_back(ssdi);
         }
-        else{}
       }
     }
 
     if ((i+1)%N==0 && me==0) { //domaine 1 : modification de la derniere ligne
       col.push_back(i),row.push_back(i),val.push_back(gamma);
     }
-
     else if((i+1)%N==1 && me==1){ //domaine 2 : modification de la premiere ligne
       col.push_back(i),row.push_back(i),val.push_back(gamma);
     }
-
     else{col.push_back(i),row.push_back(i),val.push_back(di);}
 
   }
-
 }
 
 // -----------------------------------------------------------------------------
@@ -189,7 +128,7 @@ void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<doub
   double delta=D*dt/(dx*dx),eta(1);
 
   if (alpha != 0) eta=2*D*dt*beta/(dx*alpha);
-  else eta=delta;
+  else eta=1./(dx*dx);
 
   for(int j=0; j<Ny; j++){
     for(int i=0; i<N; i++){
@@ -243,26 +182,24 @@ void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &va
   ssdi=-dt*D/(dy*dy);
   di=1-2*(sdi+ssdi);
 
-  gamma = di+2*D*dt*beta/(dx*alpha);
+  if (alpha != 0) gamma = di+2*D*dt*beta/(dx*alpha);
+  else gamma = 1./(dx*dx);
 
-  printf("sdi=%f , ssdi=%f , di=%f , di+2*D*dt*beta/(dx*alpha)=%f \n",sdi,ssdi,di,di+2*D*dt*beta/(dx*alpha));
+  //printf("sdi=%f , ssdi=%f , di=%f , di+2*D*dt*beta/(dx*alpha)=%f \n",sdi,ssdi,di,di+2*D*dt*beta/(dx*alpha));
 
   for(int i=0; i<(N*Ny); i++){
 
     if (me==0) { // Proc 0
 
-      if ((i+1)%N==0) {//domaine 1 //modification de la derniere ligne
-        col.push_back(i),row.push_back(i),val.push_back(gamma);
-      }
-
-      else{col.push_back(i),row.push_back(i),val.push_back(di);}
-
       if((i+1)%N==0){}
       else{
         if ((i+1)%N==N-1) {
-          col.push_back(i); //stockage de la sous-diagonale
-          row.push_back(i+1);
-          val.push_back(2*sdi);
+          if (alpha==0){}
+          else{
+            col.push_back(i); //stockage de la sous-diagonale
+            row.push_back(i+1);
+            val.push_back(2*sdi);
+          }
         }
         else if((i+1)%N==N){}
         else{
@@ -275,6 +212,22 @@ void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &va
         row.push_back(i);
         val.push_back(sdi);
       }
+
+      if(i+N<N*Ny){
+        col.push_back(i); //stockage de la sous-sous-diagonale
+        row.push_back(i+N);
+        val.push_back(ssdi);
+        col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
+        row.push_back(i);
+        val.push_back(ssdi);
+      }
+
+      if ((i+1)%N==0) {//domaine 1 //modification de la derniere ligne
+        col.push_back(i),row.push_back(i),val.push_back(gamma);
+      }
+
+      else{col.push_back(i),row.push_back(i),val.push_back(di);}
+
     }
 
     else if (me==Nproc-1) { // Proc Nproc-1
@@ -344,15 +297,6 @@ void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &va
           val.push_back(sdi);
         }
       }
-    }
-
-    if(i+N<N*Ny){
-      col.push_back(i); //stockage de la sous-sous-diagonale
-      row.push_back(i+N);
-      val.push_back(ssdi);
-      col.push_back(i+N); //stockage de la sur-sur-diagonale (symetrie)
-      row.push_back(i);
-      val.push_back(ssdi);
     }
   }
 }
