@@ -278,10 +278,10 @@ void Write_(std::vector<double> U_loc,int IBeg,int IEnd,int Nx,int Ny,int N,doub
   std::ofstream NewFichier(oss.str().c_str(), std::ios::out | std::ios::trunc);
 
   std::vector<double> x_tab_loc,y_tab_loc;
-  for (int i = IBeg; i < IEnd; i++) x_tab_loc.push_back(i*Lx/(Nx+1));
+  for (int i = IBeg; i < IEnd+1; i++) x_tab_loc.push_back(i*Lx/(Nx+1));
   for (int j = 0; j < Ny; j++) y_tab_loc.push_back(j*Ly/(Ny+1));
 
-  for (int i = 0; i < N-1; i++){
+  for (int i = 0; i < N; i++){
     for (int j = 0; j < Ny; j++){
       NewFichier<< x_tab_loc[i] <<" "<<  y_tab_loc[j] << " " << U_loc[i+j*N] << std::endl;
     }
