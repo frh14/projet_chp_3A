@@ -19,5 +19,6 @@
 	* beta (1) : coefficient pour la condition de Dirichlet 
 * Arguments facultatifs pour l'executable
 	* h_part, parametre de recouvrement: nombre de lignes communes aux deux domaines
+	* mode, pour le choix des fonctions f,g,h (mode=1,2,3)
 	* Nt, nombre d'iterations en temps
 ------------------------------
