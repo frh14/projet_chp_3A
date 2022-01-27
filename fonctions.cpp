@@ -51,8 +51,7 @@ double maj_error(std::vector<double> U, std::vector<double> V, int h, int Ny, in
 
   for (int j=0; j<Ny; j++){
     for (int i=0; i<h; i++ ){
-      //printf("U[%d]=%f et V[%d]=%f \n",j*Nu+Nu-h+i,U[j*Nu+Nu-h+i],Nv*j+i,V[Nv*j+i]);
-      error = abs(U[j*Nu+Nu-h+i]-V[j*Nv+i]);
+      error = abs(U[(j+1)*Nu-h+i]-V[j*Nv+i]);
       if (error>error_max) error_max=error;
     }
   }

@@ -48,37 +48,28 @@ int main(int argc, char** argv){
   int kmax=10*Nx*Ny; //iteration max du BICGStab
 
   //Parametres d'arret pour Schwarz
-  double errschwz=1e-8; //tolerace pour Schwarz
+  double errschwz=1e-8; //tolerance pour Schwarz
   int maxschwz=10*Nx*Ny; //iteration max pour Schwarz
 
+  struct timeval t1,t2;
+
   //----------------------------------------------------------------------
-  // resolution sequentielle du probleme de diffusion
+  // resolution sequentielle du probleme de diffusion par decomposition de domaine
   //----------------------------------------------------------------------
 
   if (sequential==1) {
-
-    //construction des indices de separation de domaine selon ses lignes
-    int Nu(0); //domaine 1
-    int Nv(0); //domaine 2
-    //test sur la parite de Nx
-    if (Nx%2==0) Nu=Nx/2,Nv=Nx/2+h_part;
-    else if (Nx%2==1) Nu=(Nx-1)/2,Nv=(Nx+1)/2+h_part;
-
-    //construction des vecteurs inconnues sur chaque sous domaine au temps initial:
-    std::vector<double> U(Nu*Ny,1); //domaine 1
-    std::vector<double> V(Nv*Ny,1); //domaine 2
-
-    struct timeval t1,t2;
-    gettimeofday(&t1, NULL);
-
-    Update(U,V,Nx,Ny,Nu,Nv,Lx,Ly,D,dt,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
-
-    gettimeofday(&t2, NULL);
 
     printf("\n!===== Resolution par decomposition de domaine =====! \n\n");
     printf("  Parametres maillage : Nx = %d, Ny = %d, Lx = %f , Ly = %f \n",Nx,Ny,Lx,Ly);
     printf("  Parametres simulation : D = %f, mode = %d, Nt = %d, dt = %f \n",D,mode,Nt,dt);
     printf("  Parametre decomposition domaine :  h_part = %d, alpha = %f, beta = %f \n",h_part,alpha,beta);
+
+    gettimeofday(&t1, NULL);
+
+    Update_dd(Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
+
+    gettimeofday(&t2, NULL);
+
     printf("\n  temps d'execution : %lu \n\n",t2.tv_usec - t1.tv_usec);
 
   }
@@ -94,7 +85,18 @@ int main(int argc, char** argv){
 
   if (sequential==0) {
 
-    Update_(argc, argv,Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
+    printf("\n!===== Decomposition de domaines multithreads =====! \n\n");
+    printf("  Parametres maillage : Nx = %d, Ny = %d, Lx = %f , Ly = %f \n",Nx,Ny,Lx,Ly);
+    printf("  Parametres simulation : D = %f, mode = %d, Nt = %d, dt = %f \n",D,mode,Nt,dt);
+    printf("  Parametre decomposition domaine :  h_part = %d, alpha = %f, beta = %f \n",h_part,alpha,beta);
+
+    gettimeofday(&t1, NULL);
+
+    Update_pll(argc, argv,Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
+
+    gettimeofday(&t2, NULL);
+
+    printf("\n  temps d'execution : %lu \n\n",t2.tv_usec - t1.tv_usec);
 
   }
 

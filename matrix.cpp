@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 //fonction qui remplit la matrice de diffusion sur un sous domaine
 
-void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int N, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
+void Matrix_dd(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int N, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
@@ -20,8 +20,6 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
 
   if (alpha != 0) gamma = di+2*D*dt*beta/(dx*alpha);
   else gamma = 1./(dx*dx);
-
-  //printf("sdi=%f , ssdi=%f , di=%f , gamma=%f \n",sdi,ssdi,di,gamma);
 
   for(int i=0; i<(N*Ny); i++){
 
@@ -120,9 +118,9 @@ void Matrix(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val
 }
 
 // -----------------------------------------------------------------------------
-//fonction qui remplit le vecteur second membre du probleme selon le domaine ou l'on se trouve
+//fonction qui remplit le vecteur second membre du probleme sur un sous domaine
 
-void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
+void secondMembre_dd(std::vector<double> &S,std::vector<double> U, std::vector<double> V, int Nx, int Ny,int N, double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
   double delta=D*dt/(dx*dx),eta(1);
@@ -173,7 +171,7 @@ void secondMembre(std::vector<double> &S,std::vector<double> U, std::vector<doub
 //------------------------------------------------------------------------------
 //fonction qui remplit la matrice de diffusion sur un proc
 
-void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int N, int Nproc, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
+void Matrix_pll(std::vector<int> &row,std::vector<int> &col,std::vector<double> &val,int Nx, int Ny, int N, int Nproc, double Lx, double Ly, double D, double dt, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
 
@@ -184,8 +182,6 @@ void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &va
 
   if (alpha != 0) gamma = di+2*D*dt*beta/(dx*alpha);
   else gamma = 1./(dx*dx);
-
-  //printf("sdi=%f , ssdi=%f , di=%f , di+2*D*dt*beta/(dx*alpha)=%f \n",sdi,ssdi,di,di+2*D*dt*beta/(dx*alpha));
 
   for(int i=0; i<(N*Ny); i++){
 
@@ -347,7 +343,7 @@ void Matrix_(std::vector<int> &row,std::vector<int> &col,std::vector<double> &va
 // -----------------------------------------------------------------------------
 //fonction qui remplit le vecteur second membre selon le proc
 
-void secondMembre_(std::vector<double> &S,std::vector<double> U, std::vector<double> V1,std::vector<double> V2, int Nx, int Ny, int N, int Nproc,double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
+void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<double> V1,std::vector<double> V2, int Nx, int Ny, int N, int Nproc,double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
   double delta=D*dt/(dx*dx),eta(1);
