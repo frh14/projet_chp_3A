@@ -51,8 +51,6 @@ int main(int argc, char** argv){
   double errschwz=1e-8; //tolerance pour Schwarz
   int maxschwz=10*Nx*Ny; //iteration max pour Schwarz
 
-  struct timeval tstart,tstop;
-
   //----------------------------------------------------------------------
   // resolution sequentielle du probleme de diffusion par decomposition de domaine
   //----------------------------------------------------------------------
@@ -64,13 +62,7 @@ int main(int argc, char** argv){
     printf("  Parametres simulation : D = %f, mode = %d, Nt = %d, dt = %f \n",D,mode,Nt,dt);
     printf("  Parametre decomposition domaine :  h_part = %d, alpha = %f, beta = %f \n",h_part,alpha,beta);
 
-    gettimeofday(&tstart, NULL);
-
     Update_dd(Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
-
-    gettimeofday(&tstop, NULL);
-
-    printf("\n  temps d'execution : %lu \n\n",((tstop.tv_sec - tstart.tv_sec) * 1000000 + tstop.tv_usec) - tstart.tv_usec);
 
   }
 
@@ -95,16 +87,9 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD,&me);  //processeur local
     MPI_Comm_size(MPI_COMM_WORLD,&Nproc); //nombre de processeur total utilisés
 
-    gettimeofday(&tstart, NULL);
-
     Update_pll(Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz,me,Nproc);
 
-    gettimeofday(&tstop, NULL);
-
     MPI_Finalize();
-
-    printf("\nThread %d on %d\n",me,Nproc);
-    printf("  temps d'execution : %lu \n",((tstop.tv_sec - tstart.tv_sec) * 1000000 + tstop.tv_usec) - tstart.tv_usec);
 
   }
 
