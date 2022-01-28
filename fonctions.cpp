@@ -57,3 +57,15 @@ double maj_error(std::vector<double> U, std::vector<double> V, int h, int Ny, in
   }
   return error_max;
 }
+
+double maj_error_pll(std::vector<double> U, std::vector<double> V, int h, int Ny, int N){
+  double error, error_max(0.);
+
+  for (int j = 0; j < Ny; j++){
+    for (int i = 0; i < h; i++){
+      error = abs(U[(j+1)*N-h+i]-V[j*h+i]);
+      if (error>error_max) error_max=error;
+    }
+  }
+  return error_max;
+}

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sys/time.h>
 #include <mpi.h>
 
 #include "fonctions.hpp"
@@ -119,15 +120,9 @@ void Write_dd(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,i
 
 }
 
-void Update_pll(int argc, char** argv,int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int h_part,double alpha,double beta,int Nt,double e,int kmax,double errschwz,int maxschwz){
-
-  MPI_Init(&argc,&argv);
-  int me,Nproc;
-  MPI_Comm_rank(MPI_COMM_WORLD,&me);  //processeur local
-  MPI_Comm_size(MPI_COMM_WORLD,&Nproc); //nombre de processeur total utilisés
+void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int h_part,double alpha,double beta,int Nt,double e,int kmax,double errschwz,int maxschwz,int me,int Nproc){
 
   if (Nproc<2){
-    MPI_Finalize();
     Update_dd(Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
   }
   else{
@@ -140,12 +135,17 @@ void Update_pll(int argc, char** argv,int Nx,int Ny,double dt,double Lx,double L
     else{IBeg-=h_part;}
 
     int N=IEnd-IBeg+1;
+    printf("\n Thread %d , IBeg %d , IEnd %d , N %d\n", me,IBeg,IEnd,N);
 
     std::vector<double> U_loc(N*Ny,1);
-    std::vector<double> V_loc(h_part*Ny,1);
 
     std::vector<double> U0_loc(3*Ny,0.);
     std::vector<double> V0_loc(3*Ny,0.);
+    std::vector<double> mssgR(3*Ny,0.);
+    std::vector<double> mssgL(3*Ny,0.);
+
+    std::vector<double> V_loc(h_part*Ny,1);
+    std::vector<double> mssgErr(h_part*Ny,1.);
 
     std::vector<int> row_loc, col_loc;
     std::vector<double> val_loc;
@@ -155,13 +155,9 @@ void Update_pll(int argc, char** argv,int Nx,int Ny,double dt,double Lx,double L
     double error_loc(1.); int iteschwz_loc(0);
 
     MPI_Status Status;
-    //printf("\nThread %d on %d \n",me,Nproc);
-    //printf("  thread %d N==%d \n",me,N);
 
     //schema en temps
     for (int k = 0; k < Nt; k++){
-
-      //printf("  thread %d starts time iteration %d\n",me,k);
 
       double t = k*dt; //temps de l'experience
 
@@ -172,133 +168,116 @@ void Update_pll(int argc, char** argv,int Nx,int Ny,double dt,double Lx,double L
 
         std::vector<double> S_loc(N*Ny,0.);
 
-        secondMembre_pll(S_loc,U_loc,U0_loc,V0_loc,Nx,Ny,N,Nproc,dt,t,Lx,Ly,D,mode,alpha,beta,me);
+        secondMembre_pll(S_loc,U_loc,U0_loc,V0_loc,Nx,Ny,IBeg,IEnd,Nproc,dt,t,Lx,Ly,D,mode,alpha,beta,me);
         BICGStab(row_loc,col_loc,val_loc,U_loc,S_loc,e,kmax,N,Ny);
 
         if (me==0) { // Proc 0
           for (int j = 0; j < Ny; j++){
-            // Proc 0 envoit U a proc 1
-            MPI_Send(&U_loc[N*(j+1)-h_part-1],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
-            MPI_Send(&U_loc[N*(j+1)-h_part],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD);
-            MPI_Send(&U_loc[N*(j+1)-h_part+1],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD);
-
-            // Proc 0 recoit stencil droite U0 de proc 1
-            MPI_Recv(&U0_loc[j],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD,&Status);
-            MPI_Recv(&U0_loc[j+Ny],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
-            MPI_Recv(&U0_loc[j+2*Ny],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD,&Status);
+            mssgR[j] = U_loc[N*(j+1)-h_part-2];
+            mssgR[j+Ny] = U_loc[N*(j+1)-h_part-1];
+            mssgR[j+2*Ny] = U_loc[N*(j+1)-h_part];
           }
+
+          // Proc 0 envoit U a proc 1
+          MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
+          // Proc 0 recoit stencil droite U0 de proc 1
+          MPI_Recv(&U0_loc[0],3*Ny,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
         }
 
         else if (me==Nproc-1) { // Proc Nproc-1
           for (int j = 0; j < Ny; j++){
-            if (me%2==0){
-              // Proc Nproc-1 envoit U a proc Nproc-2
-              MPI_Send(&U_loc[N*j+h_part-2],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part-1],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            mssgL[j] = U_loc[N*j+h_part-1];
+            mssgL[j+Ny] = U_loc[N*j+h_part];
+            mssgL[j+2*Ny] = U_loc[N*j+h_part+1];
+          }
 
-              // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
-              MPI_Recv(&V0_loc[j],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+Ny],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+2*Ny],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD,&Status);
-            }
-            else{
-              // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
-              MPI_Recv(&V0_loc[j],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+Ny],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+2*Ny],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD,&Status);
-
-              // Proc Nproc-1 envoit U a proc Nproc-2
-              MPI_Send(&U_loc[N*j+h_part-2],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part-1],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
-            }
+          if (me%2==0){
+            // Proc Nproc-1 envoit U a proc Nproc-2
+            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
+            MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,3,MPI_COMM_WORLD,&Status);
+          }
+          else{
+            // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
+            MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
+            // Proc Nproc-1 envoit U a proc Nproc-2
+            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
           }
         }
 
         else {
           for (int j = 0; j < Ny; j++){
+            mssgR[j] = U_loc[N*(j+1)-h_part-2];
+            mssgR[j+Ny] = U_loc[N*(j+1)-h_part-1];
+            mssgR[j+2*Ny] = U_loc[N*(j+1)-h_part];
 
-            if (me%2==0){
-              // Proc me envoit U a proc me-1
-              MPI_Send(&U_loc[N*j+h_part-2],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part-1],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            mssgL[j] = U_loc[N*j+h_part-1];
+            mssgL[j+Ny] = U_loc[N*j+h_part];
+            mssgL[j+2*Ny] = U_loc[N*j+h_part+1];
+          }
 
-              // Proc me envoit U a proc me+1
-              MPI_Send(&U_loc[N*(j+1)-h_part-1],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*(j+1)-h_part],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*(j+1)-h_part+1],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD);
+          if (me%2==0){
+            // Proc me envoit U a proc me-1
+            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            // Proc me envoit U a proc me+1
+            MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
 
-              // Proc me recoit stencil gauche V0 de proc me-1
-              MPI_Recv(&V0_loc[j],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+Ny],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+2*Ny],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD,&Status);
+            // Proc me recoit stencil gauche V0 de proc me-1
+            MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,3,MPI_COMM_WORLD,&Status);
+            // Proc me recoit stencil droite U0 de proc me+1
+            MPI_Recv(&U0_loc[0],3*Ny,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
+          }
+          else{
+            // Proc me recoit stencil gauche V0 de proc me-1
+            MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
+            // Proc me recoit stencil droite U0 de proc me+1
+            MPI_Recv(&U0_loc[0],3*Ny,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD,&Status);
 
-              // Proc me recoit stencil droite U0 de proc me+1
-              MPI_Recv(&U0_loc[j],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&U0_loc[j+Ny],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&U0_loc[j+2*Ny],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD,&Status);
-            }
-            else{
-              // Proc me recoit stencil gauche V0 de proc me-1
-              MPI_Recv(&V0_loc[j],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+Ny],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&V0_loc[j+2*Ny],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD,&Status);
-
-              // Proc me recoit stencil droite U0 de proc me+1
-              MPI_Recv(&U0_loc[j],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&U0_loc[j+Ny],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
-              MPI_Recv(&U0_loc[j+2*Ny],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD,&Status);
-
-              // Proc me envoit U a proc me-1
-              MPI_Send(&U_loc[N*j+h_part-2],1,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part-1],1,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*j+h_part],1,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
-
-              // Proc me envoit U a proc me+1
-              MPI_Send(&U_loc[N*(j+1)-h_part-1],1,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*(j+1)-h_part],1,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD);
-              MPI_Send(&U_loc[N*(j+1)-h_part+1],1,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD);
-            }
+            // Proc me envoit U a proc me-1
+            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
+            // Proc me envoit U a proc me+1
+            MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,3,MPI_COMM_WORLD);
           }
         }
 
-        if (me!=0) {
-          for (int j = 0; j < Ny; j++) {
-            for (int i = 0; i < h_part; i++) {
-              MPI_Send(&U_loc[j*N+i],1,MPI_DOUBLE,me-1,10,MPI_COMM_WORLD);
-            }
+        for (int j = 0; j < Ny; j++) {
+          for (int i = 0; i < h_part; i++) {
+            mssgErr[j*h_part+i] = U_loc[j*N+i];
           }
         }
 
-        if (me!=Nproc-1) {
-          double error_max(0.);
-          for (int j = 0; j < Ny; j++){
-            for (int i = 0; i < h_part; i++){
-              MPI_Recv(&V_loc[j*h_part+i],1,MPI_DOUBLE,me+1,10,MPI_COMM_WORLD,&Status);
-              error_loc = abs(U_loc[(j+1)*N-h_part+i]-V_loc[j*h_part+i]);
-              if (error_loc>error_max) error_max=error_loc;
-            }
-          }
+        if (me==0){
+          MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,5,MPI_COMM_WORLD,&Status);
 
-          error_loc=error_max;
-
-          MPI_Send(&error_loc,1,MPI_DOUBLE,me+1,10,MPI_COMM_WORLD);
+          error_loc = maj_error_pll(U_loc,V_loc,h_part,Ny,N);
         }
 
-        if (me!=0) {
-          MPI_Recv(&error_loc,1,MPI_DOUBLE,me-1,10,MPI_COMM_WORLD,&Status);
+        else if (me==Nproc-1){
+          if (me%2==0) MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
+          else  MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
+          MPI_Recv(&error_loc,1,MPI_DOUBLE,me-1,6,MPI_COMM_WORLD,&Status);
+        }
+
+        else{
+          if (me%2==0){
+            MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,5,MPI_COMM_WORLD,&Status);
+            MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
+          }
+          else{
+            MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
+            MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,4,MPI_COMM_WORLD,&Status);
+          }
+
+          error_loc = maj_error_pll(U_loc,V_loc,h_part,Ny,N);
+
+          if (me==Nproc-2) MPI_Send(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
         }
 
         iteschwz_loc++;
       }
-      //printf("\n  thread %d iteschwz %d with errschwz %f\n",me,iteschwz_loc,error_loc);
 
       Write_pll(U_loc,IBeg,IEnd,Nx,Ny,N,Lx,Ly,h_part,k,me);
-
     }
-    MPI_Finalize();
   }
 }
 
