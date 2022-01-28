@@ -17,6 +17,9 @@
 
 void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int h_part,double alpha,double beta,int Nt,double e,int kmax,double errschwz,int maxschwz){
 
+  struct timeval tstart,tstop;
+  gettimeofday(&tstart, NULL);
+
   //construction des indices de separation de domaine selon ses lignes
   int Nu(0); //domaine 1
   int Nv(0); //domaine 2
@@ -83,9 +86,10 @@ void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int
 
       iteschwz++;
     }
-    if (iteschwz>=maxschwz) printf("\n Schwarz n'a pas convergé ! Erreur Schwarz : %f\n",error);
+    //if (iteschwz>=maxschwz) printf("\n Schwarz n'a pas convergé ! Erreur Schwarz : %f\n",error);
 
-    printf("\n End time iteration %d , time = %f\n",k,t);
+    gettimeofday(&tstop, NULL);
+    printf("\n  temps d'execution : %lu \n\n",((tstop.tv_sec - tstart.tv_sec) * 1000000 + tstop.tv_usec) - tstart.tv_usec);
 
     //ecriture dans les  fichiers
     Write_dd(U,V,Nx,Ny,Nu,Nv,Lx,Ly,h_part,k);
@@ -121,6 +125,9 @@ void Write_dd(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,i
 }
 
 void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int h_part,double alpha,double beta,int Nt,double e,int kmax,double errschwz,int maxschwz,int me,int Nproc){
+
+  struct timeval tstart,tstop;
+  gettimeofday(&tstart, NULL);
 
   if (Nproc<2){
     Update_dd(Nx,Ny,dt,Lx,Ly,D,mode,h_part,alpha,beta,Nt,e,kmax,errschwz,maxschwz);
@@ -250,6 +257,8 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
           MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,5,MPI_COMM_WORLD,&Status);
 
           error_loc = maj_error_pll(U_loc,V_loc,h_part,Ny,N);
+
+          if (me==Nproc-2) MPI_Send(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
         }
 
         else if (me==Nproc-1){
@@ -275,6 +284,11 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
         iteschwz_loc++;
       }
+      //if (iteschwz_loc>=maxschwz) printf("\n Schwarz n'a pas convergé ! Erreur Schwarz : %f\n",error_loc);
+
+      gettimeofday(&tstop, NULL);
+      printf("\nThread %d on %d\n",me,Nproc);
+      printf("\n  temps d'execution : %lu \n\n",((tstop.tv_sec - tstart.tv_sec) * 1000000 + tstop.tv_usec) - tstart.tv_usec);
 
       Write_pll(U_loc,IBeg,IEnd,Nx,Ny,N,Lx,Ly,h_part,k,me);
     }
