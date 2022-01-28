@@ -343,13 +343,15 @@ void Matrix_pll(std::vector<int> &row,std::vector<int> &col,std::vector<double> 
 // -----------------------------------------------------------------------------
 //fonction qui remplit le vecteur second membre selon le proc
 
-void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<double> V1,std::vector<double> V2, int Nx, int Ny, int N, int Nproc,double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
+void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<double> V1,std::vector<double> V2, int Nx, int Ny, int IBeg, int IEnd, int Nproc,double dt,double t, double Lx, double Ly, double D, int mode, double alpha, double beta, int me){
 
   double dx=Lx/(Nx+1),dy=Ly/(Ny+1); //pas d'espace
   double delta=D*dt/(dx*dx),eta(1);
 
   if (alpha != 0) eta=2*D*dt*beta/(dx*alpha);
   else eta=1./(dx*dx);
+
+  int N=IEnd-IBeg+1;
 
   for(int j=0; j<Ny; j++){
     for(int i=0; i<N; i++){
@@ -358,11 +360,11 @@ void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<
 
       if (me==0){ // Proc 0
 
-        S[i+j*N]+=dt*f((i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        S[i+j*N]+=dt*f((IBeg+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-        if (j==0) S[i+j*N]+=D*dt*g((i+1)*dx,0,mode)/(dy*dy);
+        if (j==0) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,0,mode)/(dy*dy);
 
-        if (j==Ny-1) S[i+j*N]+=D*dt*g((i+1)*dx,Ly,mode)/(dy*dy);
+        if (j==Ny-1) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,Ly,mode)/(dy*dy);
 
         if (i==0) S[i+j*N]+=D*dt*h(0,(j+1)*dy,mode)/(dx*dx);
 
@@ -374,11 +376,11 @@ void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<
 
       else if (me==Nproc-1){ // Proc Nproc-1
 
-        S[i+j*N]+=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        S[i+j*N]+=dt*f((IBeg+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-        if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
+        if (j==0) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,0,mode)/(dy*dy);
 
-        if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
+        if (j==Ny-1) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,Ly,mode)/(dy*dy);
 
         if (i==0){
           if (alpha==0) S[i+j*N]=eta*V2[Ny+j];
@@ -390,11 +392,11 @@ void secondMembre_pll(std::vector<double> &S,std::vector<double> U, std::vector<
 
       else{
 
-        S[i+j*N]+=dt*f((Nx-N+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
+        S[i+j*N]+=dt*f((IBeg+i+1)*dx,(j+1)*dy,t,Lx,Ly,mode);
 
-        if (j==0) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,0,mode)/(dy*dy);
+        if (j==0) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,0,mode)/(dy*dy);
 
-        if (j==Ny-1) S[i+j*N]+=D*dt*g((Nx-N+i+1)*dx,Ly,mode)/(dy*dy);
+        if (j==Ny-1) S[i+j*N]+=D*dt*g((IBeg+i+1)*dx,Ly,mode)/(dy*dy);
 
         if (i==0){
           if (alpha==0) S[i+j*N]=eta*V2[Ny+j];
