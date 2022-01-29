@@ -186,7 +186,7 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
           }
 
           // Proc 0 envoit U a proc 1
-          MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
+          MPI_Ssend(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
           // Proc 0 recoit stencil droite U0 de proc 1
           MPI_Recv(&U0_loc[0],3*Ny,MPI_DOUBLE,me+1,1,MPI_COMM_WORLD,&Status);
         }
@@ -200,7 +200,7 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
           if (me%2==0){
             // Proc Nproc-1 envoit U a proc Nproc-2
-            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
             // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
             MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,3,MPI_COMM_WORLD,&Status);
           }
@@ -208,7 +208,7 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
             // Proc Nproc-1 recoit stencil gauche V0 de proc Nproc-2
             MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,0,MPI_COMM_WORLD,&Status);
             // Proc Nproc-1 envoit U a proc Nproc-2
-            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
           }
         }
 
@@ -225,9 +225,9 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
           if (me%2==0){
             // Proc me envoit U a proc me-1
-            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,2,MPI_COMM_WORLD);
             // Proc me envoit U a proc me+1
-            MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,0,MPI_COMM_WORLD);
 
             // Proc me recoit stencil gauche V0 de proc me-1
             MPI_Recv(&V0_loc[0],3*Ny,MPI_DOUBLE,me-1,3,MPI_COMM_WORLD,&Status);
@@ -241,9 +241,9 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
             MPI_Recv(&U0_loc[0],3*Ny,MPI_DOUBLE,me+1,2,MPI_COMM_WORLD,&Status);
 
             // Proc me envoit U a proc me-1
-            MPI_Send(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgL[0],3*Ny,MPI_DOUBLE,me-1,1,MPI_COMM_WORLD);
             // Proc me envoit U a proc me+1
-            MPI_Send(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,3,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgR[0],3*Ny,MPI_DOUBLE,me+1,3,MPI_COMM_WORLD);
           }
         }
 
@@ -258,28 +258,28 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
           error_loc = maj_error_pll(U_loc,V_loc,h_part,Ny,N);
 
-          if (me==Nproc-2) MPI_Send(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
+          if (me==Nproc-2) MPI_Ssend(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
         }
 
         else if (me==Nproc-1){
-          if (me%2==0) MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
-          else  MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
+          if (me%2==0) MPI_Ssend(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
+          else  MPI_Ssend(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
           MPI_Recv(&error_loc,1,MPI_DOUBLE,me-1,6,MPI_COMM_WORLD,&Status);
         }
 
         else{
           if (me%2==0){
             MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,5,MPI_COMM_WORLD,&Status);
-            MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,4,MPI_COMM_WORLD);
           }
           else{
-            MPI_Send(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
+            MPI_Ssend(&mssgErr[0],Ny*h_part,MPI_DOUBLE,me-1,5,MPI_COMM_WORLD);
             MPI_Recv(&V_loc[0],Ny*h_part,MPI_DOUBLE,me+1,4,MPI_COMM_WORLD,&Status);
           }
 
           error_loc = maj_error_pll(U_loc,V_loc,h_part,Ny,N);
 
-          if (me==Nproc-2) MPI_Send(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
+          if (me==Nproc-2) MPI_Ssend(&error_loc,1,MPI_DOUBLE,Nproc-1,6,MPI_COMM_WORLD);
         }
 
         iteschwz_loc++;
