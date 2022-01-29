@@ -22,3 +22,9 @@
 	* mode, pour le choix des fonctions f,g,h (mode=1,2,3)
 	* Nt, nombre d'iterations en temps
 ------------------------------
+Commande pour visualiser avec gnuplot les fichiers solutionMe.txt ecrits dans le dossier Results,
+avec Me le numero d'un proc
+
+* gnuplot
+* splot for [i=0:X-1] 'solution'.i.'.txt'
+------------------------------
