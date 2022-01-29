@@ -46,14 +46,13 @@ void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int
   //domaine 2
   Matrix_dd(rowv,colv,valv,Nx,Ny,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  double error(1.); int iteschwz(0);
-
   //schema en temps
   for (int k = 0; k < Nt; k++){
 
     printf("\n Start time iteration %d\n",k);
 
     double t = k*dt; //temps de l'experience
+    double error(1.); int iteschwz(0);
 
     //Initialisation des stencils
     for (int i = 0; i < 3*Ny; i++) U0[i]=1.,V0[i]=1.;
@@ -99,7 +98,7 @@ void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int
 
 void Write_dd(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,int Nv,double Lx,double Ly,int h_part,int k){
 
-  std::string prefixeu="solutionU";
+  std::string prefixeu="Results/solutionU";
   std::ostringstream oss;
   oss<<prefixeu<<k<<".txt";
   std::ofstream NewFichieru(oss.str().c_str(), std::ios::out | std::ios::trunc);
@@ -159,14 +158,13 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
     Matrix_pll(row_loc,col_loc,val_loc,Nx,Ny,N,Nproc,Lx,Ly,D,dt,alpha,beta,me);
 
-    double error_loc(1.); int iteschwz_loc(0);
-
     MPI_Status Status;
 
     //schema en temps
     for (int k = 0; k < Nt; k++){
 
       double t = k*dt; //temps de l'experience
+      double error_loc(1.); int iteschwz_loc(0);
 
       //Initialisation des stencils
       for (int i = 0; i < 3*Ny; i++) U0_loc[i]=1.,V0_loc[i]=1.;
@@ -297,7 +295,7 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
 void Write_pll(std::vector<double> U_loc,int IBeg,int IEnd,int Nx,int Ny,int N,double Lx,double Ly,int h_part,int k,int me){
 
-  std::string prefix="solution";
+  std::string prefix="Results/solution";
   std::ostringstream oss;
   oss<<prefix<<me<<".txt";
   std::ofstream NewFichier(oss.str().c_str(), std::ios::out | std::ios::trunc);
