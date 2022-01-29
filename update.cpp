@@ -46,14 +46,13 @@ void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int
   //domaine 2
   Matrix_dd(rowv,colv,valv,Nx,Ny,Nv,Lx,Ly,D,dt,alpha,beta,1);
 
-  double error(1.); int iteschwz(0);
-
   //schema en temps
   for (int k = 0; k < Nt; k++){
 
     printf("\n Start time iteration %d\n",k);
 
     double t = k*dt; //temps de l'experience
+    double error(1.); int iteschwz(0);
 
     //Initialisation des stencils
     for (int i = 0; i < 3*Ny; i++) U0[i]=1.,V0[i]=1.;
@@ -159,14 +158,13 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
     Matrix_pll(row_loc,col_loc,val_loc,Nx,Ny,N,Nproc,Lx,Ly,D,dt,alpha,beta,me);
 
-    double error_loc(1.); int iteschwz_loc(0);
-
     MPI_Status Status;
 
     //schema en temps
     for (int k = 0; k < Nt; k++){
 
       double t = k*dt; //temps de l'experience
+      double error_loc(1.); int iteschwz_loc(0);
 
       //Initialisation des stencils
       for (int i = 0; i < 3*Ny; i++) U0_loc[i]=1.,V0_loc[i]=1.;
