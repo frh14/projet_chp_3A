@@ -98,7 +98,7 @@ void Update_dd(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,int
 
 void Write_dd(std::vector<double> U,std::vector<double> V,int Nx,int Ny,int Nu,int Nv,double Lx,double Ly,int h_part,int k){
 
-  std::string prefixeu="solutionU";
+  std::string prefixeu="Results/solutionU";
   std::ostringstream oss;
   oss<<prefixeu<<k<<".txt";
   std::ofstream NewFichieru(oss.str().c_str(), std::ios::out | std::ios::trunc);
@@ -295,7 +295,7 @@ void Update_pll(int Nx,int Ny,double dt,double Lx,double Ly,double D,int mode,in
 
 void Write_pll(std::vector<double> U_loc,int IBeg,int IEnd,int Nx,int Ny,int N,double Lx,double Ly,int h_part,int k,int me){
 
-  std::string prefix="solution";
+  std::string prefix="Results/solution";
   std::ostringstream oss;
   oss<<prefix<<me<<".txt";
   std::ofstream NewFichier(oss.str().c_str(), std::ios::out | std::ios::trunc);
